@@ -1,0 +1,5 @@
+.firebase/
+.claude/
+node_modules/
+*.zip
+MIBs_XA_New*/

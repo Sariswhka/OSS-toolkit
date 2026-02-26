@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>EMS Integration Toolkit - OSS/BSS Tools for Telecom Engineers</title>
+    <meta name="description" content="Free tools for Telecom OSS engineers - TL1 Parser, Alarm Mapper, Payload Transformer, SNMP OID Browser. Simplify EMS integration.">
+    <meta name="keywords" content="EMS integration, OSS tools, TL1 parser, alarm mapping, SNMP OID, telecom tools, network management">
+    <meta name="robots" content="index, follow">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3b82f6">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="section">
+        <div class="container login-container">
+            <div class="logo">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="2"/>
+                    <path d="M7 7h3v3H7z"/>
+                    <path d="M14 7h3v3h-3z"/>
+                    <path d="M7 14h3v3H7z"/>
+                    <path d="M14 14h3v3h-3z"/>
+                    <line x1="12" y1="2" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                </svg>
+            </div>
+            <h1>EMS Integration Toolkit</h1>
+            <p class="subtitle">Tools for Telecom OSS/BSS Engineers</p>
+
+            <button id="googleLoginBtn" class="btn google-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
+            </button>
+
+            <p id="loginError" class="login-error"></p>
+            <p class="terms">By signing in, you agree to our Terms of Service</p>
+        </div>
+    </div>
+
+    <!-- App Section -->
+    <div id="appSection" class="section hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="2" width="20" height="20" rx="2"/>
+                        <path d="M7 7h3v3H7z"/>
+                        <path d="M14 7h3v3h-3z"/>
+                        <path d="M7 14h3v3H7z"/>
+                        <line x1="12" y1="2" x2="12" y2="22"/>
+                    </svg>
+                    <span>EMS Toolkit</span>
+                </div>
+                <div class="user-info">
+                    <a href="docs.html" class="btn-docs" title="User Guide">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        Docs
+                    </a>
+                    <img id="userPhoto" src="" alt="User" class="user-avatar">
+                    <span id="userName"></span>
+                    <button id="logoutBtn" class="btn-logout">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Tool Selection -->
+                <div class="tool-nav">
+                    <button class="tool-tab active" data-tool="tl1">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 17 10 11 4 5"/>
+                                <line x1="12" y1="19" x2="20" y2="19"/>
+                            </svg>
+                            TL1 Parser
+                        </span>
+                        <span class="usage-badge" data-tool="tl1"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="alarm">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                            </svg>
+                            Alarm Mapper
+                        </span>
+                        <span class="usage-badge" data-tool="alarm"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="transform">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="16 3 21 3 21 8"/>
+                                <line x1="4" y1="20" x2="21" y2="3"/>
+                                <polyline points="21 16 21 21 16 21"/>
+                                <line x1="15" y1="15" x2="21" y2="21"/>
+                                <line x1="4" y1="4" x2="9" y2="9"/>
+                            </svg>
+                            Payload Transform
+                        </span>
+                        <span class="usage-badge" data-tool="transform"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="snmp">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            SNMP OID
+                        </span>
+                        <span class="usage-badge" data-tool="snmp"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="netconf">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            NETCONF/XML
+                        </span>
+                        <span class="usage-badge" data-tool="netconf"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="yang">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3h18v18H3z"/>
+                                <path d="M12 8v8"/>
+                                <path d="M8 12h8"/>
+                                <circle cx="12" cy="12" r="2"/>
+                            </svg>
+                            YANG Parser
+                        </span>
+                        <span class="usage-badge" data-tool="yang"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="e2e">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="5" cy="6" r="3"/>
+                                <circle cx="19" cy="6" r="3"/>
+                                <circle cx="12" cy="18" r="3"/>
+                                <line x1="5" y1="9" x2="5" y2="12"/>
+                                <line x1="19" y1="9" x2="19" y2="12"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <line x1="12" y1="12" x2="12" y2="15"/>
+                            </svg>
+                            E2E Generator
+                        </span>
+                        <span class="usage-badge" data-tool="e2e"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="compare">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 3h5v5"/>
+                                <path d="M8 3H3v5"/>
+                                <path d="M21 3l-7 7"/>
+                                <path d="M3 3l7 7"/>
+                                <path d="M16 21h5v-5"/>
+                                <path d="M8 21H3v-5"/>
+                                <path d="M21 21l-7-7"/>
+                                <path d="M3 21l7-7"/>
+                            </svg>
+                            Config Compare
+                        </span>
+                        <span class="usage-badge" data-tool="compare"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="xmlparser">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 7 4 4 20 4 20 7"/>
+                                <line x1="9" y1="20" x2="15" y2="20"/>
+                                <line x1="12" y1="4" x2="12" y2="20"/>
+                                <rect x="3" y="10" width="6" height="4" rx="1"/>
+                                <rect x="15" y="10" width="6" height="4" rx="1"/>
+                            </svg>
+                            XML Parser
+                        </span>
+                        <span class="usage-badge" data-tool="xml"></span>
+                    </button>
+                    <button class="tool-tab" data-tool="jsonparser">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 6h2a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2 2 2 0 0 0-2 2v1a2 2 0 0 1-2 2H4"/>
+                                <path d="M20 6h-2a2 2 0 0 0-2 2v1a2 2 0 0 1-2 2 2 2 0 0 1 2 2v1a2 2 0 0 0 2 2h2"/>
+                            </svg>
+                            JSON Parser
+                        </span>
+                        <span class="usage-badge" data-tool="json"></span>
+                    </button>
+                </div>
+
+                <!-- TL1 Parser Tool -->
+                <div class="tool-panel active" id="tl1Panel">
+                    <div class="tool-header">
+                        <h2>TL1 Command Parser & Builder</h2>
+                        <p>Parse TL1 responses or build TL1 commands for EMS integration</p>
+                    </div>
+
+                    <div class="tool-modes">
+                        <button class="mode-btn active" data-mode="parse">Parse Response</button>
+                        <button class="mode-btn" data-mode="build">Build Command</button>
+                    </div>
+
+                    <!-- Parse Mode -->
+                    <div class="mode-content active" id="tl1ParseMode">
+                        <div class="input-section">
+                            <label>TL1 Response</label>
+                            <textarea id="tl1Input" placeholder="Paste TL1 response here...
+
+Example:
+   ABC-NE 2024-01-15 10:30:45
+M  12345 COMPLD
+   &quot;SLOT-1-1::PROVISIONEDTYPE=OTU4,ADMINSTATE=IS:IS-NR&quot;
+   &quot;SLOT-1-2::PROVISIONEDTYPE=OTU4,ADMINSTATE=OOS:OOS-MA&quot;
+;"></textarea>
+                            <div class="input-actions">
+                                <button class="btn btn-secondary" id="tl1ParseBtn">Parse</button>
+                                <button class="btn btn-outline" id="tl1ClearBtn">Clear</button>
+                                <button class="btn btn-outline" id="tl1SampleBtn">Load Sample</button>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-header">
+                                <label>Parsed Output</label>
+                                <div class="output-format">
+                                    <button class="format-btn active" data-format="json">JSON</button>
+                                    <button class="format-btn" data-format="table">Table</button>
+                                    <button class="format-btn" data-format="csv">CSV</button>
+                                </div>
+                            </div>
+                            <div id="tl1Output" class="output-area"></div>
+                            <button class="btn btn-primary" id="tl1CopyBtn">Copy Output</button>
+                        </div>
+                    </div>
+
+                    <!-- Build Mode -->
+                    <div class="mode-content" id="tl1BuildMode">
+                        <div class="build-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Command</label>
+                                    <select id="tl1Command">
+                                        <option value="RTRV">RTRV (Retrieve)</option>
+                                        <option value="ENT">ENT (Enter/Create)</option>
+                                        <option value="ED">ED (Edit)</option>
+                                        <option value="DLT">DLT (Delete)</option>
+                                        <option value="ACT">ACT (Activate)</option>
+                                        <option value="CANC">CANC (Cancel)</option>
+                                        <option value="INH">INH (Inhibit)</option>
+                                        <option value="ALW">ALW (Allow)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Entity Type</label>
+                                    <input type="text" id="tl1Entity" placeholder="e.g., EQPT, OTU, ODU, ETH">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>TID (Target ID)</label>
+                                    <input type="text" id="tl1Tid" placeholder="e.g., NE-WEST-01">
+                                </div>
+                                <div class="form-group">
+                                    <label>AID (Access ID)</label>
+                                    <input type="text" id="tl1Aid" placeholder="e.g., SLOT-1-1, ALL">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>CTAG</label>
+                                    <input type="text" id="tl1Ctag" placeholder="e.g., 12345" value="">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Parameters (name=value, comma separated)</label>
+                                <input type="text" id="tl1Params" placeholder="e.g., ADMINSTATE=IS,TYPE=OTU4">
+                            </div>
+                            <button class="btn btn-primary" id="tl1GenerateBtn">Generate Command</button>
+                        </div>
+                        <div class="output-section">
+                            <label>Generated TL1 Command</label>
+                            <div id="tl1GeneratedOutput" class="output-area code-output"></div>
+                            <button class="btn btn-secondary" id="tl1CopyGenBtn">Copy Command</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alarm Mapper Tool -->
+                <div class="tool-panel" id="alarmPanel">
+                    <div class="tool-header">
+                        <h2>Alarm Mapping Tool</h2>
+                        <p>Create and manage alarm mappings between EMS and OSS systems</p>
+                    </div>
+
+                    <div class="alarm-layout">
+                        <div class="mapping-editor">
+                            <h3>Add Alarm Mapping</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>EMS Alarm ID</label>
+                                    <input type="text" id="emsAlarmId" placeholder="e.g., ALM-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>EMS Alarm Name</label>
+                                    <input type="text" id="emsAlarmName" placeholder="e.g., LOS">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>OSS Alarm ID</label>
+                                    <input type="text" id="ossAlarmId" placeholder="e.g., 5001">
+                                </div>
+                                <div class="form-group">
+                                    <label>OSS Alarm Name</label>
+                                    <input type="text" id="ossAlarmName" placeholder="e.g., LOSS_OF_SIGNAL">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Severity</label>
+                                    <select id="alarmSeverity">
+                                        <option value="CRITICAL">Critical</option>
+                                        <option value="MAJOR">Major</option>
+                                        <option value="MINOR">Minor</option>
+                                        <option value="WARNING">Warning</option>
+                                        <option value="CLEARED">Cleared</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select id="alarmCategory">
+                                        <option value="COMMUNICATION">Communication</option>
+                                        <option value="EQUIPMENT">Equipment</option>
+                                        <option value="ENVIRONMENTAL">Environmental</option>
+                                        <option value="PROCESSING">Processing</option>
+                                        <option value="QOS">Quality of Service</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" id="alarmDescription" placeholder="Alarm description">
+                            </div>
+                            <button class="btn btn-primary" id="addMappingBtn">Add Mapping</button>
+                        </div>
+
+                        <div class="mapping-list">
+                            <div class="list-header">
+                                <h3>Alarm Mappings</h3>
+                                <div class="list-actions">
+                                    <button class="btn btn-outline btn-sm" id="importMappingBtn">Import</button>
+                                    <button class="btn btn-outline btn-sm" id="exportMappingBtn">Export</button>
+                                    <button class="btn btn-outline btn-sm" id="clearMappingBtn">Clear All</button>
+                                </div>
+                            </div>
+                            <div class="search-box">
+                                <input type="text" id="alarmSearch" placeholder="Search alarms...">
+                            </div>
+                            <div id="alarmMappingTable" class="mapping-table">
+                                <div class="table-header">
+                                    <span>EMS</span>
+                                    <span>OSS</span>
+                                    <span>Severity</span>
+                                    <span>Actions</span>
+                                </div>
+                                <div id="mappingRows" class="table-body">
+                                    <!-- Mapping rows will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="importMappingFile" accept=".json,.csv" hidden>
+                </div>
+
+                <!-- Payload Transform Tool -->
+                <div class="tool-panel" id="transformPanel">
+                    <div class="tool-header">
+                        <h2>Payload Transformer</h2>
+                        <p>Convert between XML, JSON, CSV, and YAML formats</p>
+                    </div>
+
+                    <div class="transform-layout">
+                        <div class="transform-input">
+                            <div class="transform-header">
+                                <label>Input</label>
+                                <select id="inputFormat">
+                                    <option value="json">JSON</option>
+                                    <option value="xml">XML</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="yaml">YAML</option>
+                                </select>
+                            </div>
+                            <textarea id="transformInput" placeholder="Paste your input data here..."></textarea>
+                            <div class="input-actions">
+                                <button class="btn btn-outline" id="transformSampleBtn">Load Sample</button>
+                                <button class="btn btn-outline" id="transformClearBtn">Clear</button>
+                            </div>
+                        </div>
+
+                        <div class="transform-controls">
+                            <button class="btn btn-primary btn-transform" id="transformBtn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                    <polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                                Transform
+                            </button>
+                        </div>
+
+                        <div class="transform-output">
+                            <div class="transform-header">
+                                <label>Output</label>
+                                <select id="outputFormat">
+                                    <option value="xml">XML</option>
+                                    <option value="json">JSON</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="yaml">YAML</option>
+                                </select>
+                            </div>
+                            <div id="transformOutput" class="output-area"></div>
+                            <button class="btn btn-secondary" id="transformCopyBtn">Copy Output</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SNMP OID Tool -->
+                <div class="tool-panel" id="snmpPanel">
+                    <div class="tool-header">
+                        <h2>SNMP OID Browser & Decoder</h2>
+                        <p>Decode OIDs, browse MIB trees, and format SNMP data</p>
+                    </div>
+
+                    <div class="snmp-layout">
+                        <div class="oid-decoder">
+                            <h3>OID Decoder</h3>
+                            <div class="form-group">
+                                <label>Enter OID</label>
+                                <input type="text" id="oidInput" placeholder="e.g., 1.3.6.1.2.1.1.1.0 or iso.org.dod.internet...">
+                            </div>
+                            <button class="btn btn-primary" id="decodeOidBtn">Decode OID</button>
+                            <div id="oidResult" class="oid-result"></div>
+                        </div>
+
+                        <div class="mib-browser">
+                            <h3>Common MIB OIDs</h3>
+                            <div class="mib-search">
+                                <input type="text" id="mibSearch" placeholder="Search OIDs...">
+                            </div>
+                            <div id="mibTree" class="mib-tree">
+                                <!-- MIB tree will be populated -->
+                            </div>
+                        </div>
+
+                        <div class="snmp-formatter">
+                            <h3>SNMP Data Formatter</h3>
+                            <div class="form-group">
+                                <label>SNMP Walk Output</label>
+                                <textarea id="snmpWalkInput" placeholder="Paste SNMP walk output here..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <button class="btn btn-secondary" id="formatSnmpBtn">Format as Table</button>
+                                <button class="btn btn-outline" id="exportSnmpBtn">Export CSV</button>
+                            </div>
+                            <div id="snmpFormatOutput" class="output-area"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NETCONF/XML Tool -->
+                <div class="tool-panel" id="netconfPanel">
+                    <div class="tool-header">
+                        <h2>NETCONF/XML Tools</h2>
+                        <p>Format, validate, and generate NETCONF XML payloads</p>
+                    </div>
+
+                    <div class="netconf-layout">
+                        <div class="xml-editor">
+                            <div class="editor-header">
+                                <label>XML Editor</label>
+                                <div class="editor-actions">
+                                    <button class="btn btn-outline btn-sm" id="formatXmlBtn">Format</button>
+                                    <button class="btn btn-outline btn-sm" id="minifyXmlBtn">Minify</button>
+                                    <button class="btn btn-outline btn-sm" id="validateXmlBtn">Validate</button>
+                                </div>
+                            </div>
+                            <textarea id="xmlInput" placeholder="Paste XML here..."></textarea>
+                            <div id="xmlValidation" class="validation-result"></div>
+                        </div>
+
+                        <div class="netconf-templates">
+                            <h3>NETCONF Templates</h3>
+                            <div class="template-list">
+                                <button class="template-btn" data-template="get">
+                                    <span class="template-name">GET</span>
+                                    <span class="template-desc">Retrieve configuration</span>
+                                </button>
+                                <button class="template-btn" data-template="get-config">
+                                    <span class="template-name">GET-CONFIG</span>
+                                    <span class="template-desc">Get running config</span>
+                                </button>
+                                <button class="template-btn" data-template="edit-config">
+                                    <span class="template-name">EDIT-CONFIG</span>
+                                    <span class="template-desc">Modify configuration</span>
+                                </button>
+                                <button class="template-btn" data-template="rpc">
+                                    <span class="template-name">RPC</span>
+                                    <span class="template-desc">Custom RPC call</span>
+                                </button>
+                                <button class="template-btn" data-template="notification">
+                                    <span class="template-name">NOTIFICATION</span>
+                                    <span class="template-desc">Subscribe events</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="xpath-tester">
+                            <h3>XPath Tester</h3>
+                            <div class="form-group">
+                                <label>XPath Expression</label>
+                                <input type="text" id="xpathInput" placeholder="e.g., //interface/name">
+                            </div>
+                            <button class="btn btn-secondary" id="testXpathBtn">Test XPath</button>
+                            <div id="xpathResult" class="output-area"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YANG Parser/Comparison -->
+                <div class="tool-panel" id="yangPanel">
+                    <div class="tool-header">
+                        <h2>YANG Parser & Comparison</h2>
+                        <p>Parse YANG modules, visualize schema tree, and compare versions</p>
+                    </div>
+
+                    <!-- Mode Selection -->
+                    <div class="mode-selector">
+                        <button class="mode-btn active" data-mode="parse">Parse</button>
+                        <button class="mode-btn" data-mode="compare">Compare</button>
+                        <button class="mode-btn" data-mode="tree">Tree View</button>
+                    </div>
+
+                    <!-- Parse Mode -->
+                    <div class="yang-mode active" id="yangParseMode">
+                        <div class="yang-input-section">
+                            <label>YANG Module</label>
+                            <textarea id="yangInput" placeholder="Paste YANG module here..."></textarea>
+                        </div>
+                        <div class="yang-actions">
+                            <button class="btn btn-primary" id="parseYangBtn">Parse</button>
+                            <button class="btn btn-outline" id="validateYangBtn">Validate</button>
+                            <button class="btn btn-outline" id="clearYangBtn">Clear</button>
+                        </div>
+                        <div class="yang-output">
+                            <h3>Parse Result</h3>
+                            <div id="yangParseOutput" class="output-area"></div>
+                        </div>
+                    </div>
+
+                    <!-- Compare Mode -->
+                    <div class="yang-mode" id="yangCompareMode">
+                        <div class="yang-compare-layout">
+                            <div class="yang-compare-input">
+                                <label>Original YANG Module</label>
+                                <textarea id="yangCompareInput1" placeholder="Paste original YANG module..."></textarea>
+                            </div>
+                            <div class="yang-compare-input">
+                                <label>Modified YANG Module</label>
+                                <textarea id="yangCompareInput2" placeholder="Paste modified YANG module..."></textarea>
+                            </div>
+                        </div>
+                        <div class="yang-actions">
+                            <button class="btn btn-primary" id="compareYangBtn">Compare</button>
+                            <button class="btn btn-outline" id="clearCompareBtn">Clear Both</button>
+                        </div>
+                        <div class="yang-output">
+                            <h3>Comparison Result</h3>
+                            <div id="yangCompareOutput" class="output-area"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tree View Mode -->
+                    <div class="yang-mode" id="yangTreeMode">
+                        <div class="yang-input-section">
+                            <label>YANG Module</label>
+                            <textarea id="yangTreeInput" placeholder="Paste YANG module here..."></textarea>
+                        </div>
+                        <div class="yang-actions">
+                            <button class="btn btn-primary" id="generateTreeBtn">Generate Tree</button>
+                            <button class="btn btn-outline" id="clearTreeBtn">Clear</button>
+                        </div>
+                        <div class="yang-output">
+                            <h3>Schema Tree</h3>
+                            <div id="yangTreeOutput" class="output-area tree-view"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- E2E Integration Solution Generator -->
+                <div class="tool-panel" id="e2ePanel">
+                    <div class="tool-header">
+                        <h2>E2E Integration Solution Generator</h2>
+                        <p>Design complete integration solutions with auto-generated architecture, code, and deployment artifacts</p>
+                    </div>
+
+                    <div class="e2e-layout">
+                        <!-- Phase Navigation -->
+                        <div class="phase-nav">
+                            <div class="phase-step active" data-phase="1">
+                                <span class="phase-num">1</span>
+                                <span class="phase-title">Requirements</span>
+                            </div>
+                            <div class="phase-step" data-phase="2">
+                                <span class="phase-num">2</span>
+                                <span class="phase-title">Design</span>
+                            </div>
+                            <div class="phase-step" data-phase="3">
+                                <span class="phase-num">3</span>
+                                <span class="phase-title">Artifacts</span>
+                            </div>
+                            <div class="phase-step" data-phase="4">
+                                <span class="phase-num">4</span>
+                                <span class="phase-title">Deploy</span>
+                            </div>
+                        </div>
+
+                        <!-- Phase Content -->
+                        <div class="phase-content">
+                            <!-- Phase 1: Requirements -->
+                            <div class="phase-panel active" id="phase1">
+                                <div class="phase-header">
+                                    <h3>Phase 1: Requirements Gathering</h3>
+                                    <p>Define your integration requirements, source/destination systems, and business rules</p>
+                                </div>
+
+                                <!-- Sub-sections accordion -->
+                                <div class="requirements-sections">
+                                    <!-- Project Details -->
+                                    <div class="req-section active" data-section="project">
+                                        <div class="req-section-header">
+                                            <span class="section-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                                                </svg>
+                                            </span>
+                                            <span>Project Details</span>
+                                            <span class="section-status">Required</span>
+                                        </div>
+                                        <div class="req-section-content">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Project Name *</label>
+                                                    <input type="text" id="e2eProjectName" placeholder="e.g., Customer-Order-Integration">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Project Description</label>
+                                                    <input type="text" id="e2eProjectDesc" placeholder="Brief description of the integration">
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Integration Type *</label>
+                                                    <select id="e2eIntegrationType">
+                                                        <option value="">Select type...</option>
+                                                        <option value="etl">ETL / Batch Processing</option>
+                                                        <option value="realtime">Real-time / Event-driven</option>
+                                                        <option value="api">API Integration</option>
+                                                        <option value="hybrid">Hybrid (Batch + Real-time)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Integration Pattern *</label>
+                                                    <select id="e2ePattern">
+                                                        <option value="">Select pattern...</option>
+                                                        <option value="point-to-point">Point-to-Point</option>
+                                                        <option value="hub-spoke">Hub and Spoke</option>
+                                                        <option value="esb">Enterprise Service Bus</option>
+                                                        <option value="event-driven">Event-Driven Architecture</option>
+                                                        <option value="pub-sub">Publish-Subscribe</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Technology Stack *</label>
+                                                <div class="checkbox-group">
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="e2eTechJava" value="java"> Java / Spring Boot
+                                                    </label>
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="e2eTechPython" value="python"> Python
+                                                    </label>
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="e2eTechNode" value="nodejs"> Node.js
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- MIB Analysis (Optional) -->
+                                    <div class="req-section" data-section="mib">
+                                        <div class="req-section-header">
+                                            <span class="section-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                                    <polyline points="14 2 14 8 20 8"/>
+                                                    <path d="M12 18v-6"/>
+                                                    <path d="M9 15l3 3 3-3"/>
+                                                </svg>
+                                            </span>
+                                            <span>MIB Analysis</span>
+                                            <span class="section-status optional">Optional</span>
+                                        </div>
+                                        <div class="req-section-content">
+                                            <p class="text-sm-muted-mb">
+                                                Upload a MIB file to auto-populate source configuration, data mappings, and business rules for SNMP-based integrations.
+                                            </p>
+
+                                            <!-- Loaded MIBs Panel (hidden until at least one MIB loaded) -->
+                                            <div class="mib-loaded-list" id="mibLoadedList" class="d-none">
+                                                <div class="mib-loaded-header">
+                                                    <span>Loaded MIBs</span>
+                                                    <button class="btn btn-outline btn-sm" id="mibClearAllBtn">Clear All</button>
+                                                </div>
+                                                <div class="mib-chips" id="mibChips"></div>
+                                            </div>
+
+                                            <!-- Upload Zone -->
+                                            <div class="mib-upload-zone" id="mibUploadZone">
+                                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                                    <polyline points="17 8 12 3 7 8"/>
+                                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                                </svg>
+                                                <p id="mibUploadZoneLabel">Drag & drop MIB file here, or click to browse</p>
+                                                <span class="upload-hint">Supported: .mib, .txt, .my (max 2MB) &nbsp;&bull;&nbsp; You can load multiple MIBs — they will be merged</span>
+                                                <input type="file" id="mibFileInput" accept=".mib,.txt,.my" hidden>
+                                            </div>
+
+                                            <!-- OR Divider -->
+                                            <div class="mib-divider">or load a sample</div>
+
+                                            <!-- Sample MIB Selector -->
+                                            <div class="mib-sample-row">
+                                                <select id="mibSampleSelect">
+                                                    <option value="">Select a sample MIB...</option>
+                                                </select>
+                                                <button class="btn btn-outline btn-sm" id="mibLoadSampleBtn">Load Sample</button>
+                                            </div>
+
+                                            <!-- Parse Status (hidden by default) -->
+                                            <div class="mib-parse-status" id="mibParseStatus" class="d-none">
+                                                <div class="mib-spinner"></div>
+                                                <span>Parsing MIB file...</span>
+                                            </div>
+
+                                            <!-- Results (hidden until parse) -->
+                                            <div class="mib-results" id="mibResults" class="d-none">
+                                                <!-- Stats Bar -->
+                                                <div class="mib-stats">
+                                                    <div class="mib-stat">
+                                                        <div class="stat-value" id="mibStatTotal">0</div>
+                                                        <div class="stat-label">Total Objects</div>
+                                                    </div>
+                                                    <div class="mib-stat fm">
+                                                        <div class="stat-value" id="mibStatFm">0</div>
+                                                        <div class="stat-label">Fault Mgmt</div>
+                                                    </div>
+                                                    <div class="mib-stat pm">
+                                                        <div class="stat-value" id="mibStatPm">0</div>
+                                                        <div class="stat-label">Performance</div>
+                                                    </div>
+                                                    <div class="mib-stat cm">
+                                                        <div class="stat-value" id="mibStatCm">0</div>
+                                                        <div class="stat-label">Config Mgmt</div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Module Info -->
+                                                <div class="mib-module-info" id="mibModuleInfo"></div>
+
+                                                <!-- Category Tabs -->
+                                                <div class="mib-cat-tabs">
+                                                    <button class="mib-cat-tab active" data-cat="fm">
+                                                        FM - Alarms <span class="cat-badge fm" id="mibCatBadgeFm">0</span>
+                                                    </button>
+                                                    <button class="mib-cat-tab" data-cat="pm">
+                                                        PM - Counters <span class="cat-badge pm" id="mibCatBadgePm">0</span>
+                                                    </button>
+                                                    <button class="mib-cat-tab" data-cat="cm">
+                                                        CM - Config <span class="cat-badge cm" id="mibCatBadgeCm">0</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- FM Panel -->
+                                                <div class="mib-cat-panel active" data-cat-panel="fm">
+                                                    <div class="mib-select-all">
+                                                        <input type="checkbox" id="mibSelectAllFm" checked>
+                                                        <label for="mibSelectAllFm">Select all FM objects</label>
+                                                    </div>
+                                                    <div class="mib-objects-list" id="mibFmList"></div>
+                                                </div>
+
+                                                <!-- PM Panel -->
+                                                <div class="mib-cat-panel" data-cat-panel="pm">
+                                                    <div class="mib-select-all">
+                                                        <input type="checkbox" id="mibSelectAllPm" checked>
+                                                        <label for="mibSelectAllPm">Select all PM objects</label>
+                                                    </div>
+                                                    <div class="mib-objects-list" id="mibPmList"></div>
+                                                </div>
+
+                                                <!-- CM Panel -->
+                                                <div class="mib-cat-panel" data-cat-panel="cm">
+                                                    <div class="mib-select-all">
+                                                        <input type="checkbox" id="mibSelectAllCm" checked>
+                                                        <label for="mibSelectAllCm">Select all CM objects</label>
+                                                    </div>
+                                                    <div class="mib-objects-list" id="mibCmList"></div>
+                                                </div>
+
+                                                <!-- Actions -->
+                                                <div class="mib-actions">
+                                                    <button class="btn btn-primary" id="mibApplyBtn">Apply to Integration</button>
+                                                    <button class="btn btn-outline" id="mibClearBtn">Clear MIB Data</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Source System -->
+                                    <div class="req-section" data-section="source">
+                                        <div class="req-section-header">
+                                            <span class="section-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                                                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                                                </svg>
+                                            </span>
+                                            <span>Source System</span>
+                                            <span class="section-status">Required</span>
+                                        </div>
+                                        <div class="req-section-content">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>System Type *</label>
+                                                    <select id="e2eSourceType">
+                                                        <option value="">Select type...</option>
+                                                        <option value="database">Database (SQL/NoSQL)</option>
+                                                        <option value="api">REST/SOAP API</option>
+                                                        <option value="file">File System (CSV, XML, JSON)</option>
+                                                        <option value="mq">Message Queue (Kafka, RabbitMQ)</option>
+                                                        <option value="ftp">FTP/SFTP</option>
+                                                        <option value="ems">EMS/NMS</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>System Name *</label>
+                                                    <input type="text" id="e2eSourceName" placeholder="e.g., Oracle EBS, SAP, Custom API">
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Data Format *</label>
+                                                    <select id="e2eSourceFormat">
+                                                        <option value="">Select format...</option>
+                                                        <option value="json">JSON</option>
+                                                        <option value="xml">XML</option>
+                                                        <option value="csv">CSV</option>
+                                                        <option value="avro">Avro</option>
+                                                        <option value="parquet">Parquet</option>
+                                                        <option value="sql">SQL Result Set</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Connection Details</label>
+                                                    <input type="text" id="e2eSourceConn" placeholder="e.g., host:port/database">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Source Schema / Sample Data</label>
+                                                <textarea id="e2eSourceSchema" placeholder="Paste sample data or schema definition..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Destination System -->
+                                    <div class="req-section" data-section="destination">
+                                        <div class="req-section-header">
+                                            <span class="section-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                                                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                                                </svg>
+                                            </span>
+                                            <span>Destination System</span>
+                                            <span class="section-status">Required</span>
+                                        </div>
+                                        <div class="req-section-content">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>System Type *</label>
+                                                    <select id="e2eDestType">
+                                                        <option value="">Select type...</option>
+                                                        <option value="database">Database (SQL/NoSQL)</option>
+                                                        <option value="api">REST/SOAP API</option>
+                                                        <option value="file">File System (CSV, XML, JSON)</option>
+                                                        <option value="mq">Message Queue (Kafka, RabbitMQ)</option>
+                                                        <option value="ftp">FTP/SFTP</option>
+                                                        <option value="oss">OSS/BSS System</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>System Name *</label>
+                                                    <input type="text" id="e2eDestName" placeholder="e.g., Salesforce, Custom DB">
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Data Format *</label>
+                                                    <select id="e2eDestFormat">
+                                                        <option value="">Select format...</option>
+                                                        <option value="json">JSON</option>
+                                                        <option value="xml">XML</option>
+                                                        <option value="csv">CSV</option>
+                                                        <option value="avro">Avro</option>
+                                                        <option value="sql">SQL Insert/Update</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Connection Details</label>
+                                                    <input type="text" id="e2eDestConn" placeholder="e.g., https://api.example.com">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Destination Schema / Expected Format</label>
+                                                <textarea id="e2eDestSchema" placeholder="Paste expected output format or schema..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Data Mapping -->
+                                    <div class="req-section" data-section="mapping">
+                                        <div class="req-section-header">
+                                            <span class="section-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <polyline points="16 3 21 3 21 8"/>
+                                                    <line x1="4" y1="20" x2="21" y2="3"/>
+                                                    <polyline points="21 16 21 21 16 21"/>
+                                                    <line x1="15" y1="15" x2="21" y2="21"/>
+                                                    <line x1="4" y1="4" x2="9" y2="9"/>
+                                                </svg>
+                                            </span>
+                                            <span>Data Mapping</span>
+                                            <span class="section-status">Required</span>
+                                        </div>
+                                        <div class="req-section-content">
+                                            <div class="mapping-builder">
+                                                <div class="mapping-header-row">
+                                                    <span>Source Field</span>
+                                                    <span>Destination Field</span>
+                                                    <span>Transformation</span>
+                                                    <span></span>
+                                                </div>
+                                                <div id="e2eMappingRows">
+                                                    <div class="mapping-row">
+                                                        <input type="text" placeholder="source_field">
+                                                        <input type="text" placeholder="dest_field">
+                                                        <select>
+                                                            <option value="direct">Direct Copy</option>
+                                                            <option value="concat">Concatenate</option>
+                                                            <option value="split">Split</option>
+                                                            <option value="lookup">Lookup</option>
+                                                            <option value="format">Format/Convert</option>
+                                                            <option value="custom">Custom Logic</option>
+                                                        </select>
+                                                        <button class="btn-icon btn-remove-mapping" title="Remove">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                                                <line x1="6" y1="6" x2="18" y2="18"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-outline btn-sm" id="e2eAddMappingBtn">+ Add Field Mapping</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Business Rules -->
+                                    <div class="req-section" data-section="rules">
+                                        <div class="req-section-header">
+                                            <span class="section-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M12 20h9"/>
+                                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                                </svg>
+                                            </span>
+                                            <span>Business Rules</span>
+                                            <span class="section-status optional">Optional</span>
+                                        </div>
+                                        <div class="req-section-content">
+                                            <div class="rules-builder">
+                                                <div id="e2eRulesRows">
+                                                    <div class="rule-row">
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <label>Rule Name</label>
+                                                                <input type="text" placeholder="e.g., Filter Invalid Records">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Action</label>
+                                                                <select>
+                                                                    <option value="filter">Filter/Exclude</option>
+                                                                    <option value="transform">Transform</option>
+                                                                    <option value="route">Route/Split</option>
+                                                                    <option value="aggregate">Aggregate</option>
+                                                                    <option value="enrich">Enrich</option>
+                                                                    <option value="validate">Validate</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Condition / Logic</label>
+                                                            <textarea placeholder="e.g., WHERE status = 'ACTIVE' AND amount > 0"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-outline btn-sm" id="e2eAddRuleBtn">+ Add Business Rule</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Technical Requirements -->
+                                    <div class="req-section" data-section="technical">
+                                        <div class="req-section-header">
+                                            <span class="section-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="3"/>
+                                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                                </svg>
+                                            </span>
+                                            <span>Technical Requirements</span>
+                                            <span class="section-status optional">Optional</span>
+                                        </div>
+                                        <div class="req-section-content">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Error Handling</label>
+                                                    <select id="e2eErrorHandling">
+                                                        <option value="retry">Retry with Backoff</option>
+                                                        <option value="deadletter">Dead Letter Queue</option>
+                                                        <option value="alert">Alert and Skip</option>
+                                                        <option value="fail">Fail Immediately</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Logging Level</label>
+                                                    <select id="e2eLogging">
+                                                        <option value="info">Info</option>
+                                                        <option value="debug">Debug</option>
+                                                        <option value="warn">Warning</option>
+                                                        <option value="error">Error Only</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Scheduling</label>
+                                                    <select id="e2eScheduling">
+                                                        <option value="realtime">Real-time (Event-driven)</option>
+                                                        <option value="hourly">Hourly</option>
+                                                        <option value="daily">Daily</option>
+                                                        <option value="weekly">Weekly</option>
+                                                        <option value="custom">Custom Cron</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Performance Target (records/sec)</label>
+                                                    <input type="number" id="e2ePerformance" placeholder="e.g., 1000">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Security Requirements</label>
+                                                <div class="checkbox-group">
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="e2eSecEncrypt" value="encryption"> Data Encryption
+                                                    </label>
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="e2eSecAuth" value="auth"> Authentication
+                                                    </label>
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="e2eSecMask" value="masking"> Data Masking (PII)
+                                                    </label>
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="e2eSecAudit" value="audit"> Audit Logging
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="phase-actions">
+                                    <button class="btn btn-outline" id="e2eSaveReqBtn">Save Requirements</button>
+                                    <button class="btn btn-primary" id="e2eNextPhase1Btn">Generate Design →</button>
+                                </div>
+                            </div>
+
+                            <!-- Phase 2: Design -->
+                            <div class="phase-panel" id="phase2">
+                                <div class="phase-header">
+                                    <h3>Phase 2: Solution Design</h3>
+                                    <p>Auto-generated architecture diagrams and specifications based on your requirements</p>
+                                </div>
+
+                                <div class="design-tabs">
+                                    <button class="design-tab active" data-design="flow">Solution Flow</button>
+                                    <button class="design-tab" data-design="arch">Architecture</button>
+                                    <button class="design-tab" data-design="components">Components</button>
+                                    <button class="design-tab" data-design="dataflow">Data Flow</button>
+                                </div>
+
+                                <div class="design-content">
+                                    <!-- Solution Flow Diagram -->
+                                    <div class="design-panel active" id="flowDesign">
+                                        <div class="diagram-container">
+                                            <div class="diagram-header">
+                                                <h4>Solution Flow Diagram</h4>
+                                                <div class="diagram-actions">
+                                                    <button class="btn btn-outline btn-sm" id="copyFlowMermaid">Copy Mermaid</button>
+                                                    <button class="btn btn-outline btn-sm" id="openFlowMermaidLive">Open in Mermaid Live</button>
+                                                </div>
+                                            </div>
+                                            <div id="flowDiagram" class="mermaid-diagram"></div>
+                                            <div class="mermaid-code">
+                                                <label>Mermaid Code (editable):</label>
+                                                <textarea id="flowMermaidCode"></textarea>
+                                                <button class="btn btn-sm btn-secondary" id="rerenderFlowBtn">Re-render</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Architecture Diagram -->
+                                    <div class="design-panel" id="archDesign">
+                                        <div class="diagram-container">
+                                            <div class="diagram-header">
+                                                <h4>Architecture Diagram</h4>
+                                                <div class="diagram-actions">
+                                                    <button class="btn btn-outline btn-sm" id="copyArchMermaid">Copy Mermaid</button>
+                                                    <button class="btn btn-outline btn-sm" id="openArchMermaidLive">Open in Mermaid Live</button>
+                                                </div>
+                                            </div>
+                                            <div id="archDiagram" class="mermaid-diagram"></div>
+                                            <div class="mermaid-code">
+                                                <label>Mermaid Code (editable):</label>
+                                                <textarea id="archMermaidCode"></textarea>
+                                                <button class="btn btn-sm btn-secondary" id="rerenderArchBtn">Re-render</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Component Breakdown -->
+                                    <div class="design-panel" id="componentsDesign">
+                                        <div class="component-breakdown">
+                                            <div class="diagram-header">
+                                                <h4>Component Breakdown</h4>
+                                                <div class="diagram-actions">
+                                                    <button class="btn btn-outline btn-sm" id="copyComponents">Copy JSON</button>
+                                                </div>
+                                            </div>
+                                            <div id="componentTable" class="output-area"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dataflow Specification -->
+                                    <div class="design-panel" id="dataflowDesign">
+                                        <div class="dataflow-spec">
+                                            <div class="diagram-header">
+                                                <h4>Data Flow Specification</h4>
+                                                <div class="diagram-actions">
+                                                    <button class="btn btn-outline btn-sm" id="copyDataflow">Copy Markdown</button>
+                                                </div>
+                                            </div>
+                                            <div id="dataflowSpec" class="output-area"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="phase-actions">
+                                    <button class="btn btn-outline" id="e2eBackPhase1Btn">← Back to Requirements</button>
+                                    <button class="btn btn-primary" id="e2eNextPhase2Btn">Generate Artifacts →</button>
+                                </div>
+                            </div>
+
+                            <!-- Phase 3: Development Artifacts -->
+                            <div class="phase-panel" id="phase3">
+                                <div class="phase-header">
+                                    <h3>Phase 3: Development Artifacts</h3>
+                                    <p>Production-ready code, configurations, and infrastructure templates</p>
+                                </div>
+
+                                <div class="artifacts-grid">
+                                    <!-- Core Integration Code -->
+                                    <div class="artifact-card">
+                                        <div class="artifact-header">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="16 18 22 12 16 6"/>
+                                                <polyline points="8 6 2 12 8 18"/>
+                                            </svg>
+                                            <h4>Integration Code</h4>
+                                        </div>
+                                        <p>Modular, production-ready integration code</p>
+                                        <div class="artifact-files" id="codeArtifactList"></div>
+                                        <button class="btn btn-outline btn-sm" id="viewCodeArtifact">View Code</button>
+                                    </div>
+
+                                    <!-- Job Orchestration -->
+                                    <div class="artifact-card">
+                                        <div class="artifact-header">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <polyline points="12 6 12 12 16 14"/>
+                                            </svg>
+                                            <h4>Job Orchestration</h4>
+                                        </div>
+                                        <p>Scheduling and workflow definitions</p>
+                                        <div class="artifact-files" id="orchArtifactList"></div>
+                                        <button class="btn btn-outline btn-sm" id="viewOrchArtifact">View Config</button>
+                                    </div>
+
+                                    <!-- Database Schema -->
+                                    <div class="artifact-card">
+                                        <div class="artifact-header">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                                                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                                                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                                            </svg>
+                                            <h4>Database Schema</h4>
+                                        </div>
+                                        <p>DDL scripts for staging and logging tables</p>
+                                        <div class="artifact-files" id="dbArtifactList"></div>
+                                        <button class="btn btn-outline btn-sm" id="viewDbArtifact">View Schema</button>
+                                    </div>
+
+                                    <!-- Infrastructure as Code -->
+                                    <div class="artifact-card">
+                                        <div class="artifact-header">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                                <line x1="12" y1="17" x2="12" y2="21"/>
+                                            </svg>
+                                            <h4>Infrastructure</h4>
+                                        </div>
+                                        <p>Docker, Terraform, Kubernetes manifests</p>
+                                        <div class="artifact-files" id="iacArtifactList"></div>
+                                        <button class="btn btn-outline btn-sm" id="viewIacArtifact">View IaC</button>
+                                    </div>
+
+                                    <!-- Monitoring -->
+                                    <div class="artifact-card">
+                                        <div class="artifact-header">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                            </svg>
+                                            <h4>Monitoring</h4>
+                                        </div>
+                                        <p>Prometheus, Grafana, alerting configs</p>
+                                        <div class="artifact-files" id="monArtifactList"></div>
+                                        <button class="btn btn-outline btn-sm" id="viewMonArtifact">View Configs</button>
+                                    </div>
+
+                                    <!-- SNMP Configuration (hidden by default, shown when MIB applied) -->
+                                    <div class="artifact-card" id="snmpArtifactCard" class="d-none">
+                                        <div class="artifact-header">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                                <path d="M2 17l10 5 10-5"/>
+                                                <path d="M2 12l10 5 10-5"/>
+                                            </svg>
+                                            <h4>SNMP Configuration</h4>
+                                        </div>
+                                        <p>Trap receiver, poller, alarm mapping, KPI definitions</p>
+                                        <div class="artifact-files" id="snmpArtifactList"></div>
+                                        <button class="btn btn-outline btn-sm" id="viewSnmpArtifact">View SNMP Config</button>
+                                    </div>
+                                </div>
+
+                                <!-- Artifact Viewer Modal -->
+                                <div class="artifact-viewer hidden" id="artifactViewer">
+                                    <div class="artifact-viewer-header">
+                                        <h4 id="artifactViewerTitle">Artifact Viewer</h4>
+                                        <button class="btn-icon" id="closeArtifactViewer">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                                <line x1="6" y1="6" x2="18" y2="18"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="artifact-file-tabs" id="artifactFileTabs"></div>
+                                    <div class="artifact-code" id="artifactCodeContent"></div>
+                                    <div class="artifact-viewer-actions">
+                                        <button class="btn btn-secondary" id="copyArtifactCode">Copy Code</button>
+                                        <button class="btn btn-outline" id="downloadArtifact">Download File</button>
+                                    </div>
+                                </div>
+
+                                <div class="phase-actions">
+                                    <button class="btn btn-outline" id="e2eBackPhase2Btn">← Back to Design</button>
+                                    <button class="btn btn-primary" id="e2eNextPhase3Btn">Generate Deployment →</button>
+                                </div>
+                            </div>
+
+                            <!-- Phase 4: Deployment -->
+                            <div class="phase-panel" id="phase4">
+                                <div class="phase-header">
+                                    <h3>Phase 4: Execution & Deployment</h3>
+                                    <p>Scripts, testing suite, and deployment documentation</p>
+                                </div>
+
+                                <div class="deployment-sections">
+                                    <!-- Execution Scripts -->
+                                    <div class="deploy-section">
+                                        <h4>
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="4 17 10 11 4 5"/>
+                                                <line x1="12" y1="19" x2="20" y2="19"/>
+                                            </svg>
+                                            Execution Scripts
+                                        </h4>
+                                        <div class="script-list" id="execScriptList"></div>
+                                    </div>
+
+                                    <!-- Testing Suite -->
+                                    <div class="deploy-section">
+                                        <h4>
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                <polyline points="22 4 12 14.01 9 11.01"/>
+                                            </svg>
+                                            Testing Suite
+                                        </h4>
+                                        <div class="script-list" id="testScriptList"></div>
+                                    </div>
+
+                                    <!-- Deployment Guide -->
+                                    <div class="deploy-section full-width">
+                                        <h4>
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                                <polyline points="14 2 14 8 20 8"/>
+                                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                            </svg>
+                                            Deployment Guide
+                                        </h4>
+                                        <div id="deploymentGuide" class="output-area markdown-content"></div>
+                                    </div>
+                                </div>
+
+                                <div class="phase-actions final-actions">
+                                    <button class="btn btn-outline" id="e2eBackPhase3Btn">← Back to Artifacts</button>
+                                    <button class="btn btn-secondary" id="e2eExportAllBtn">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <polyline points="7 10 12 15 17 10"/>
+                                            <line x1="12" y1="15" x2="12" y2="3"/>
+                                        </svg>
+                                        Download All (ZIP)
+                                    </button>
+                                    <button class="btn btn-primary" id="e2eNewProjectBtn">Start New Project</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Config Compare Tool -->
+                <div class="tool-panel" id="comparePanel">
+                    <div class="tool-header">
+                        <h2>Configuration File Comparator</h2>
+                        <p>Compare two XML or text configuration files and identify differences</p>
+                    </div>
+
+                    <div class="compare-layout">
+                        <!-- Options Bar -->
+                        <div class="compare-options">
+                            <div class="option-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="ignoreWhitespace"> Ignore Whitespace
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="summaryOnly"> Summary Only
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="caseSensitive" checked> Case Sensitive
+                                </label>
+                            </div>
+                            <div class="file-type-indicator">
+                                <span>Detected Type:</span>
+                                <span id="detectedFileType" class="file-type-badge">Auto-detect</span>
+                            </div>
+                        </div>
+
+                        <!-- File Inputs -->
+                        <div class="compare-inputs">
+                            <div class="compare-file">
+                                <div class="file-header">
+                                    <h3>File 1 (Original)</h3>
+                                    <div class="file-actions">
+                                        <label class="btn btn-outline btn-sm upload-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                                <polyline points="17 8 12 3 7 8"/>
+                                                <line x1="12" y1="3" x2="12" y2="15"/>
+                                            </svg>
+                                            Upload
+                                            <input type="file" id="file1Upload" accept=".xml,.txt,.conf,.cfg,.json,.yaml,.yml" hidden>
+                                        </label>
+                                        <button class="btn btn-outline btn-sm" id="clearFile1">Clear</button>
+                                    </div>
+                                </div>
+                                <textarea id="file1Content" class="code-input" placeholder="Paste configuration file content here or upload a file...
+
+Supported formats:
+• XML (.xml)
+• Plain text (.txt, .conf, .cfg)
+• JSON (.json)
+• YAML (.yaml, .yml)
+
+Example XML:
+<config>
+  <server port='8080' host='localhost'/>
+  <database name='mydb'/>
+</config>"></textarea>
+                                <div class="file-info">
+                                    <span id="file1Lines">Lines: 0</span>
+                                    <span id="file1Size">Size: 0 B</span>
+                                </div>
+                            </div>
+
+                            <div class="compare-divider">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3L4 7l4 4"/>
+                                    <path d="M16 3l4 4-4 4"/>
+                                    <line x1="4" y1="7" x2="20" y2="7"/>
+                                    <path d="M8 17l-4 4 4 4"/>
+                                    <path d="M16 17l4 4-4 4"/>
+                                    <line x1="4" y1="21" x2="20" y2="21"/>
+                                </svg>
+                            </div>
+
+                            <div class="compare-file">
+                                <div class="file-header">
+                                    <h3>File 2 (Modified)</h3>
+                                    <div class="file-actions">
+                                        <label class="btn btn-outline btn-sm upload-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                                <polyline points="17 8 12 3 7 8"/>
+                                                <line x1="12" y1="3" x2="12" y2="15"/>
+                                            </svg>
+                                            Upload
+                                            <input type="file" id="file2Upload" accept=".xml,.txt,.conf,.cfg,.json,.yaml,.yml" hidden>
+                                        </label>
+                                        <button class="btn btn-outline btn-sm" id="clearFile2">Clear</button>
+                                    </div>
+                                </div>
+                                <textarea id="file2Content" class="code-input" placeholder="Paste the second configuration file here or upload..."></textarea>
+                                <div class="file-info">
+                                    <span id="file2Lines">Lines: 0</span>
+                                    <span id="file2Size">Size: 0 B</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compare Button -->
+                        <div class="compare-actions">
+                            <button class="btn btn-primary btn-large" id="compareBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 3h5v5"/>
+                                    <path d="M8 3H3v5"/>
+                                    <path d="M21 3l-7 7"/>
+                                    <path d="M3 3l7 7"/>
+                                </svg>
+                                Compare Files
+                            </button>
+                            <button class="btn btn-outline" id="swapFilesBtn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 16V4M7 4L3 8M7 4l4 4"/>
+                                    <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                                Swap Files
+                            </button>
+                        </div>
+
+                        <!-- Results Section -->
+                        <div class="compare-results" id="compareResults" class="d-none">
+                            <!-- Summary -->
+                            <div class="diff-summary" id="diffSummary">
+                                <div class="summary-stat additions">
+                                    <span class="stat-value" id="additionsCount">0</span>
+                                    <span class="stat-label">Additions</span>
+                                </div>
+                                <div class="summary-stat deletions">
+                                    <span class="stat-value" id="deletionsCount">0</span>
+                                    <span class="stat-label">Deletions</span>
+                                </div>
+                                <div class="summary-stat modifications">
+                                    <span class="stat-value" id="modificationsCount">0</span>
+                                    <span class="stat-label">Modifications</span>
+                                </div>
+                                <div class="summary-stat unchanged">
+                                    <span class="stat-value" id="unchangedCount">0</span>
+                                    <span class="stat-label">Unchanged</span>
+                                </div>
+                            </div>
+
+                            <!-- Diff Output -->
+                            <div class="diff-output-header">
+                                <h3>Differences</h3>
+                                <div class="diff-view-toggle">
+                                    <button class="view-toggle-btn active" id="summaryViewBtn" title="Summary View">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                                            <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+                                            <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                                        </svg>
+                                        Summary
+                                    </button>
+                                    <button class="view-toggle-btn" id="sideBySideViewBtn" title="Side-by-Side View">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/>
+                                        </svg>
+                                        Side-by-Side
+                                    </button>
+                                </div>
+                                <div class="diff-actions">
+                                    <button class="btn btn-outline btn-sm" id="copyDiffBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                        </svg>
+                                        Copy
+                                    </button>
+                                    <button class="btn btn-outline btn-sm" id="downloadDiffBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <polyline points="7 10 12 15 17 10"/>
+                                            <line x1="12" y1="15" x2="12" y2="3"/>
+                                        </svg>
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Summary View (default) -->
+                            <div class="diff-output" id="diffOutput">
+                                <!-- Diff content will be rendered here -->
+                            </div>
+
+                            <!-- Side-by-Side View -->
+                            <div class="side-by-side-container" id="sideBySideView" class="d-none">
+                                <div class="sbs-panel sbs-left">
+                                    <div class="sbs-header">
+                                        <span class="sbs-title">File 1 (Original)</span>
+                                        <span class="sbs-info" id="sbsFile1Info"></span>
+                                    </div>
+                                    <div class="sbs-content" id="sbsFile1Content">
+                                        <!-- File 1 lines will be rendered here -->
+                                    </div>
+                                </div>
+                                <div class="sbs-connector">
+                                    <svg class="connector-svg" id="connectorSvg">
+                                        <!-- Connection lines will be drawn here -->
+                                    </svg>
+                                </div>
+                                <div class="sbs-panel sbs-right">
+                                    <div class="sbs-header">
+                                        <span class="sbs-title">File 2 (Modified)</span>
+                                        <span class="sbs-info" id="sbsFile2Info"></span>
+                                    </div>
+                                    <div class="sbs-content" id="sbsFile2Content">
+                                        <!-- File 2 lines will be rendered here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XML Parser Tool -->
+                <div class="tool-panel" id="xmlparserPanel">
+                    <div class="tool-header">
+                        <h2>XML Parser</h2>
+                        <p>Parse XML into a flat attribute table, or compare two XML files to highlight differences</p>
+                    </div>
+
+                    <!-- Mode Tabs -->
+                    <div class="tool-modes">
+                        <button class="mode-btn active" data-xmlmode="parse">Parse &amp; Flatten</button>
+                        <button class="mode-btn" data-xmlmode="compare">Compare XML</button>
+                    </div>
+
+                    <!-- ── PARSE MODE ── -->
+                    <div class="xml-mode active" id="xmlParseMode">
+                        <div class="vendor-select-row">
+                            <label for="xmlVendorSelect">Vendor Format:</label>
+                            <select id="xmlVendorSelect" class="vendor-select">
+                                <option value="generic">Generic / AltioStar RAN</option>
+                                <option value="nokia">Nokia RAML 2.1</option>
+                                <option value="ericsson" disabled>Ericsson ENM (coming soon)</option>
+                            </select>
+                        </div>
+                        <div class="input-section">
+                            <div class="output-header">
+                                <label>XML Input</label>
+                                <label class="btn btn-outline btn-sm upload-btn" class="cursor-pointer">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    Upload XML
+                                    <input type="file" id="xmlParserFileUpload" accept=".xml,.txt" hidden>
+                                </label>
+                            </div>
+                            <textarea id="xmlParserInput" placeholder="Paste XML here or upload a file...
+
+Example:
+&lt;ManagedObjects&gt;
+  &lt;ManagedElement id=&quot;NE-1&quot; type=&quot;OTN&quot;&gt;
+    &lt;Slot name=&quot;SLOT-1&quot; adminState=&quot;IS&quot;&gt;
+      &lt;Port id=&quot;P1&quot; speed=&quot;100G&quot;/&gt;
+    &lt;/Slot&gt;
+  &lt;/ManagedElement&gt;
+&lt;/ManagedObjects&gt;" class="textarea-tall"></textarea>
+                            <div class="input-actions">
+                                <button class="btn btn-secondary" id="xmlParseBtn">Parse XML</button>
+                                <button class="btn btn-outline" id="xmlParserClearBtn">Clear</button>
+                                <button class="btn btn-outline" id="xmlParserSampleBtn">Load Sample</button>
+                            </div>
+                        </div>
+
+                        <div class="output-section" id="xmlParserOutputSection" class="d-none">
+                            <div class="output-header">
+                                <label id="xmlParserRowCount">Parsed Results</label>
+                                <div class="flex-gap-8">
+                                    <button class="btn btn-primary" id="xmlDownloadCsvBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="8 17 12 21 16 17"/>
+                                            <line x1="12" y1="21" x2="12" y2="9"/>
+                                            <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                                        </svg>
+                                        Download CSV
+                                    </button>
+                                    <button class="btn btn-outline" id="xmlCopyTableBtn">Copy Table</button>
+                                </div>
+                            </div>
+                            <div id="xmlParserTableWrapper" class="output-area" class="output-scroll"></div>
+                        </div>
+                    </div>
+
+                    <!-- ── COMPARE MODE ── -->
+                    <div class="xml-mode" id="xmlCompareMode" class="d-none">
+                        <div class="d-grid-compare">
+                            <!-- XML 1 -->
+                            <div class="input-section" class="compare-input">
+                                <div class="output-header">
+                                    <label>XML 1 — Base</label>
+                                    <label class="btn btn-outline btn-sm upload-btn" class="cursor-pointer">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <polyline points="17 8 12 3 7 8"/>
+                                            <line x1="12" y1="3" x2="12" y2="15"/>
+                                        </svg>
+                                        Upload
+                                        <input type="file" id="xmlCompare1Upload" accept=".xml,.txt" hidden>
+                                    </label>
+                                </div>
+                                <textarea id="xmlCompare1Input" placeholder="Paste base XML here..." class="textarea-compare"></textarea>
+                                <button class="btn btn-outline" id="xmlCompare1SampleBtn" class="mt-2">Load Sample</button>
+                            </div>
+                            <!-- XML 2 -->
+                            <div class="input-section" class="compare-input">
+                                <div class="output-header">
+                                    <label>XML 2 — Modified</label>
+                                    <label class="btn btn-outline btn-sm upload-btn" class="cursor-pointer">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <polyline points="17 8 12 3 7 8"/>
+                                            <line x1="12" y1="3" x2="12" y2="15"/>
+                                        </svg>
+                                        Upload
+                                        <input type="file" id="xmlCompare2Upload" accept=".xml,.txt" hidden>
+                                    </label>
+                                </div>
+                                <textarea id="xmlCompare2Input" placeholder="Paste modified XML here..." class="textarea-compare"></textarea>
+                                <button class="btn btn-outline" id="xmlCompare2SampleBtn" class="mt-2">Load Sample</button>
+                            </div>
+                        </div>
+
+                        <div class="input-actions">
+                            <button class="btn btn-secondary" id="xmlCompareBtn">Compare</button>
+                            <button class="btn btn-outline" id="xmlCompareClearBtn">Clear</button>
+                        </div>
+
+                        <!-- Summary bar -->
+                        <div id="xmlCompareSummary" class="d-none cmp-summary">
+                            <div class="cmp-summary-bar">
+                                <span id="xmlCmpAdded"    class="badge-added"></span>
+                                <span id="xmlCmpRemoved"  class="badge-removed"></span>
+                                <span id="xmlCmpModified" class="badge-modified"></span>
+                                <span id="xmlCmpUnchanged" class="badge-unchanged"></span>
+                                <div class="filter-group">
+                                    <button class="btn btn-outline btn-sm xml-cmp-filter active" data-filter="all">All</button>
+                                    <button class="btn btn-outline btn-sm xml-cmp-filter" data-filter="changed">Changed only</button>
+                                    <button class="btn btn-outline btn-sm xml-cmp-filter" data-filter="added">Added</button>
+                                    <button class="btn btn-outline btn-sm xml-cmp-filter" data-filter="removed">Removed</button>
+                                    <button class="btn btn-outline btn-sm xml-cmp-filter" data-filter="modified">Modified</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="output-section" id="xmlCompareOutputSection" class="d-none">
+                            <div class="output-header">
+                                <label id="xmlCompareRowCount">Comparison Results</label>
+                                <div class="flex-gap-8">
+                                    <button class="btn btn-primary" id="xmlCompareDownloadCsvBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="8 17 12 21 16 17"/>
+                                            <line x1="12" y1="21" x2="12" y2="9"/>
+                                            <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                                        </svg>
+                                        Download CSV
+                                    </button>
+                                    <button class="btn btn-outline" id="xmlCompareCopyBtn">Copy Table</button>
+                                </div>
+                            </div>
+                            <div id="xmlCompareTableWrapper" class="output-area" class="output-scroll"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON Parser Tool -->
+                <div class="tool-panel" id="jsonparserPanel">
+                    <div class="tool-header">
+                        <h2>JSON Parser</h2>
+                        <p>Flatten nested JSON to a tabular CSV, or compare two JSON files to highlight differences</p>
+                    </div>
+
+                    <!-- Mode Tabs -->
+                    <div class="tool-modes">
+                        <button class="mode-btn active" data-jsonmode="parse">Parse &amp; Flatten</button>
+                        <button class="mode-btn" data-jsonmode="compare">Compare JSON</button>
+                    </div>
+
+                    <!-- ── PARSE MODE ── -->
+                    <div class="json-mode active" id="jsonParseMode">
+                        <div class="input-section">
+                            <div class="output-header">
+                                <label>JSON Input</label>
+                                <label class="btn btn-outline btn-sm upload-btn" class="cursor-pointer">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    Upload JSON
+                                    <input type="file" id="jsonParserFileUpload" accept=".json,.txt" hidden>
+                                </label>
+                            </div>
+                            <textarea id="jsonParserInput" placeholder="Paste JSON here or upload a file...
+
+Example:
+{
+  &quot;managedElements&quot;: [
+    { &quot;id&quot;: &quot;NE-1&quot;, &quot;type&quot;: &quot;OTN&quot;, &quot;slot&quot;: { &quot;name&quot;: &quot;SLOT-1&quot;, &quot;state&quot;: &quot;IS&quot; } },
+    { &quot;id&quot;: &quot;NE-2&quot;, &quot;type&quot;: &quot;PTN&quot;, &quot;slot&quot;: { &quot;name&quot;: &quot;SLOT-1&quot;, &quot;state&quot;: &quot;OOS&quot; } }
+  ]
+}" class="textarea-tall"></textarea>
+                            <div class="input-actions">
+                                <button class="btn btn-secondary" id="jsonParseBtn">Parse JSON</button>
+                                <button class="btn btn-outline" id="jsonParserClearBtn">Clear</button>
+                                <button class="btn btn-outline" id="jsonParserSampleBtn">Load Sample</button>
+                            </div>
+                        </div>
+
+                        <div class="output-section" id="jsonParserOutputSection" class="d-none">
+                            <div class="output-header">
+                                <label id="jsonParserRowCount">Parsed Results</label>
+                                <div class="flex-gap-8">
+                                    <button class="btn btn-primary" id="jsonDownloadCsvBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="8 17 12 21 16 17"/>
+                                            <line x1="12" y1="21" x2="12" y2="9"/>
+                                            <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                                        </svg>
+                                        Download CSV
+                                    </button>
+                                    <button class="btn btn-outline" id="jsonCopyTableBtn">Copy Table</button>
+                                </div>
+                            </div>
+                            <div id="jsonParserTableWrapper" class="output-area" class="output-scroll"></div>
+                        </div>
+                    </div>
+
+                    <!-- ── COMPARE MODE ── -->
+                    <div class="json-mode" id="jsonCompareMode" class="d-none">
+                        <div class="d-grid-compare">
+                            <!-- JSON 1 -->
+                            <div class="input-section" class="compare-input">
+                                <div class="output-header">
+                                    <label>JSON 1 — Base</label>
+                                    <label class="btn btn-outline btn-sm upload-btn" class="cursor-pointer">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <polyline points="17 8 12 3 7 8"/>
+                                            <line x1="12" y1="3" x2="12" y2="15"/>
+                                        </svg>
+                                        Upload
+                                        <input type="file" id="jsonCompare1Upload" accept=".json,.txt" hidden>
+                                    </label>
+                                </div>
+                                <textarea id="jsonCompare1Input" placeholder="Paste base JSON here..." class="textarea-compare"></textarea>
+                                <button class="btn btn-outline" id="jsonCompare1SampleBtn" class="mt-2">Load Sample</button>
+                            </div>
+                            <!-- JSON 2 -->
+                            <div class="input-section" class="compare-input">
+                                <div class="output-header">
+                                    <label>JSON 2 — Modified</label>
+                                    <label class="btn btn-outline btn-sm upload-btn" class="cursor-pointer">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <polyline points="17 8 12 3 7 8"/>
+                                            <line x1="12" y1="3" x2="12" y2="15"/>
+                                        </svg>
+                                        Upload
+                                        <input type="file" id="jsonCompare2Upload" accept=".json,.txt" hidden>
+                                    </label>
+                                </div>
+                                <textarea id="jsonCompare2Input" placeholder="Paste modified JSON here..." class="textarea-compare"></textarea>
+                                <button class="btn btn-outline" id="jsonCompare2SampleBtn" class="mt-2">Load Sample</button>
+                            </div>
+                        </div>
+
+                        <div class="input-actions">
+                            <button class="btn btn-secondary" id="jsonCompareBtn">Compare</button>
+                            <button class="btn btn-outline" id="jsonCompareClearBtn">Clear</button>
+                        </div>
+
+                        <!-- Summary bar -->
+                        <div id="jsonCompareSummary" class="d-none cmp-summary">
+                            <div class="cmp-summary-bar">
+                                <span id="jsonCmpAdded"   class="badge-added"></span>
+                                <span id="jsonCmpRemoved" class="badge-removed"></span>
+                                <span id="jsonCmpModified" class="badge-modified"></span>
+                                <span id="jsonCmpUnchanged" class="badge-unchanged"></span>
+                                <!-- Filter buttons -->
+                                <div class="filter-group">
+                                    <button class="btn btn-outline btn-sm json-cmp-filter active" data-filter="all">All</button>
+                                    <button class="btn btn-outline btn-sm json-cmp-filter" data-filter="changed">Changed only</button>
+                                    <button class="btn btn-outline btn-sm json-cmp-filter" data-filter="added">Added</button>
+                                    <button class="btn btn-outline btn-sm json-cmp-filter" data-filter="removed">Removed</button>
+                                    <button class="btn btn-outline btn-sm json-cmp-filter" data-filter="modified">Modified</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="output-section" id="jsonCompareOutputSection" class="d-none">
+                            <div class="output-header">
+                                <label id="jsonCompareRowCount">Comparison Results</label>
+                                <div class="flex-gap-8">
+                                    <button class="btn btn-primary" id="jsonCompareDownloadCsvBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="8 17 12 21 16 17"/>
+                                            <line x1="12" y1="21" x2="12" y2="9"/>
+                                            <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                                        </svg>
+                                        Download CSV
+                                    </button>
+                                    <button class="btn btn-outline" id="jsonCompareCopyBtn">Copy Table</button>
+                                </div>
+                            </div>
+                            <div id="jsonCompareTableWrapper" class="output-area" class="output-scroll"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Privacy Notice -->
+        <div class="privacy-notice">
+            <div class="container">
+                <div class="privacy-content">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                    <span><strong>Your Privacy Matters:</strong> We do not store any of your data. All processing happens in your browser. Alarm mappings are saved locally in your browser only. Use freely!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>EMS Integration Toolkit | <a href="docs.html">User Guide</a> | <a href="https://create-your-qr.web.app">QR Code Generator</a> | <a href="https://imgtools.web.app">Image Resizer</a></p>
+        </footer>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- js-yaml for YAML parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
+    <!-- JSZip and FileSaver for ZIP export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/mib-parser.js"></script>
+    <script src="js/sample-mibs.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

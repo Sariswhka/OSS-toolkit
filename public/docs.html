@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMS Integration Toolkit - User Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/docs.css">
+</head>
+<body>
+    <header class="doc-header">
+        <h1>EMS Integration Toolkit</h1>
+        <p class="subtitle">User Guide & Documentation</p>
+        <p class="version">Version 1.3 | February 2026</p>
+    </header>
+
+    <div class="container">
+        <div class="action-bar">
+            <a href="index.html" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to App
+            </a>
+            <button class="btn" onclick="window.print()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Download PDF
+            </button>
+        </div>
+
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview"><span class="section-num">1</span> Overview</a></li>
+                <li><a href="#getting-started"><span class="section-num">2</span> Getting Started</a></li>
+                <li><a href="#tl1-parser"><span class="section-num">3</span> TL1 Parser/Builder</a></li>
+                <li><a href="#alarm-mapper"><span class="section-num">4</span> Alarm Mapper</a></li>
+                <li><a href="#payload-transformer"><span class="section-num">5</span> Payload Transformer</a></li>
+                <li><a href="#snmp-oid"><span class="section-num">6</span> SNMP OID Browser</a></li>
+                <li><a href="#netconf-xml"><span class="section-num">7</span> NETCONF/XML Tools</a></li>
+                <li><a href="#e2e-generator"><span class="section-num">8</span> E2E Integration Generator</a></li>
+                <li><a href="#xml-parser"><span class="section-num">9</span> XML Parser</a></li>
+                <li><a href="#json-parser"><span class="section-num">10</span> JSON Parser</a></li>
+                <li><a href="#tips"><span class="section-num">11</span> Tips & Best Practices</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="section">
+            <h2>1. Overview</h2>
+            <p>The EMS Integration Toolkit is a collection of browser-based utilities designed for Telecom and Network OSS engineers. These tools help with common tasks encountered when integrating Element Management Systems (EMS) with Operations Support Systems (OSS).</p>
+
+            <div class="tool-overview">
+                <div class="tool-card">
+                    <h4>TL1 Parser/Builder</h4>
+                    <p>Parse and construct TL1 (Transaction Language 1) commands used in legacy telecom systems.</p>
+                </div>
+                <div class="tool-card">
+                    <h4>Alarm Mapper</h4>
+                    <p>Create mappings between EMS alarm codes and OSS-friendly formats with severity levels.</p>
+                </div>
+                <div class="tool-card">
+                    <h4>Payload Transformer</h4>
+                    <p>Convert data between JSON, XML, CSV, and YAML formats instantly.</p>
+                </div>
+                <div class="tool-card">
+                    <h4>SNMP OID Browser</h4>
+                    <p>Decode SNMP OIDs, parse SNMP walk output, and browse common MIBs.</p>
+                </div>
+                <div class="tool-card">
+                    <h4>NETCONF/XML Tools</h4>
+                    <p>Validate XML, test XPath expressions, and format NETCONF configurations.</p>
+                </div>
+                <div class="tool-card">
+                    <h4>E2E Integration Generator</h4>
+                    <p>Design complete integration solutions with auto-generated code, diagrams, and deployment artifacts.</p>
+                </div>
+                <div class="tool-card">
+                    <h4>XML Parser</h4>
+                    <p>Parse XML files into a flat table of elements, attributes and values. Download results as CSV.</p>
+                </div>
+                <div class="tool-card">
+                    <h4>JSON Parser</h4>
+                    <p>Flatten nested JSON objects and arrays into dot-notation rows. Download results as CSV.</p>
+                </div>
+            </div>
+
+            <div class="note success">
+                <p class="note-title">Privacy First</p>
+                <p>All processing happens locally in your browser. Your data never leaves your device and is not stored on any server.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Getting Started -->
+        <section id="getting-started" class="section">
+            <h2>2. Getting Started</h2>
+
+            <h3>Accessing the Toolkit</h3>
+            <ol>
+                <li>Open your web browser and navigate to <a href="https://emstools.web.app">https://emstools.web.app</a></li>
+                <li>Sign in with your Google account</li>
+                <li>Select the tool you need from the navigation tabs</li>
+            </ol>
+
+            <h3>System Requirements</h3>
+            <ul>
+                <li>Modern web browser (Chrome, Firefox, Edge, Safari)</li>
+                <li>JavaScript enabled</li>
+                <li>Internet connection for initial load only</li>
+            </ul>
+
+            <h3>Navigation</h3>
+            <p>The toolkit uses a tab-based navigation system. Click on any tab at the top of the screen to switch between tools. Your work in each tool is preserved while switching tabs.</p>
+        </section>
+
+        <!-- Section 3: TL1 Parser/Builder -->
+        <section id="tl1-parser" class="section">
+            <h2>3. TL1 Parser/Builder</h2>
+
+            <h3>What is TL1?</h3>
+            <p>Transaction Language 1 (TL1) is a widely-used management protocol in telecommunications. It provides a standardized command structure for managing network elements.</p>
+
+            <h3>TL1 Command Structure</h3>
+            <pre><code>COMMAND-CODE:TID:AID:CTAG::PARAMETER1=VALUE1,PARAMETER2=VALUE2;</code></pre>
+
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>Command Code</td>
+                    <td>The operation to perform</td>
+                    <td>RTRV-ALM-ALL</td>
+                </tr>
+                <tr>
+                    <td>TID</td>
+                    <td>Target Identifier (network element)</td>
+                    <td>NETWORKELEM1</td>
+                </tr>
+                <tr>
+                    <td>AID</td>
+                    <td>Access Identifier (specific resource)</td>
+                    <td>SLOT-1-1</td>
+                </tr>
+                <tr>
+                    <td>CTAG</td>
+                    <td>Correlation Tag (unique identifier)</td>
+                    <td>123</td>
+                </tr>
+                <tr>
+                    <td>Parameters</td>
+                    <td>Additional command parameters</td>
+                    <td>TYPE=ALL</td>
+                </tr>
+            </table>
+
+            <h3>Using the Parser</h3>
+            <ol>
+                <li>Select the "TL1 Parser/Builder" tab</li>
+                <li>Choose "Parse TL1" mode</li>
+                <li>Paste your TL1 command into the input field</li>
+                <li>Click "Parse Command"</li>
+                <li>View the parsed components in the results panel</li>
+            </ol>
+
+            <h4>Example Input</h4>
+            <pre><code>RTRV-ALM-ALL:NETWORKELEM1:SLOT-1-1:123::TYPE=CRITICAL,SRVEFF=SA;</code></pre>
+
+            <h4>Parsed Output</h4>
+            <pre><code>{
+  "command": "RTRV-ALM-ALL",
+  "tid": "NETWORKELEM1",
+  "aid": "SLOT-1-1",
+  "ctag": "123",
+  "parameters": {
+    "TYPE": "CRITICAL",
+    "SRVEFF": "SA"
+  }
+}</code></pre>
+
+            <h3>Using the Builder</h3>
+            <ol>
+                <li>Select "Build TL1" mode</li>
+                <li>Fill in the command components (Command, TID, AID, CTAG)</li>
+                <li>Add parameters using the "Add Parameter" button</li>
+                <li>Click "Build Command"</li>
+                <li>Copy the generated TL1 command</li>
+            </ol>
+
+            <div class="note">
+                <p class="note-title">Tip</p>
+                <p>Common TL1 commands: RTRV (retrieve), ENT (enter/create), ED (edit), DLT (delete), ACT (activate)</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Alarm Mapper -->
+        <section id="alarm-mapper" class="section">
+            <h2>4. Alarm Mapper</h2>
+
+            <h3>Purpose</h3>
+            <p>The Alarm Mapper helps you create and manage mappings between EMS-specific alarm codes and standardized OSS alarm descriptions. This is essential for alarm correlation and unified monitoring.</p>
+
+            <h3>Creating a Mapping</h3>
+            <ol>
+                <li>Select the "Alarm Mapper" tab</li>
+                <li>Enter the EMS alarm code (e.g., <code>ALM_001</code>)</li>
+                <li>Enter the OSS description (e.g., <code>Link Down</code>)</li>
+                <li>Select the severity level:
+                    <ul>
+                        <li><strong>Critical</strong> - Service affecting, immediate action required</li>
+                        <li><strong>Major</strong> - Significant impact, urgent attention needed</li>
+                        <li><strong>Minor</strong> - Limited impact, scheduled attention</li>
+                        <li><strong>Warning</strong> - Potential issue, monitoring required</li>
+                        <li><strong>Info</strong> - Informational, no action needed</li>
+                    </ul>
+                </li>
+                <li>Click "Add Mapping"</li>
+            </ol>
+
+            <h3>Mapping Table</h3>
+            <p>All mappings are displayed in a table format showing:</p>
+            <ul>
+                <li>EMS Code - The original alarm identifier</li>
+                <li>OSS Description - Standardized alarm description</li>
+                <li>Severity - Color-coded severity level</li>
+                <li>Actions - Edit or delete mapping</li>
+            </ul>
+
+            <h3>Export/Import</h3>
+            <h4>Exporting Mappings</h4>
+            <ol>
+                <li>Click the "Export" button</li>
+                <li>Choose format: JSON or CSV</li>
+                <li>The file will download automatically</li>
+            </ol>
+
+            <h4>Importing Mappings</h4>
+            <ol>
+                <li>Click the "Import" button</li>
+                <li>Select a JSON or CSV file</li>
+                <li>Mappings will be added to your existing list</li>
+            </ol>
+
+            <h4>CSV Format</h4>
+            <pre><code>emsCode,ossDescription,severity
+ALM_001,Link Down,critical
+ALM_002,High CPU Usage,major
+ALM_003,Config Changed,info</code></pre>
+
+            <h4>JSON Format</h4>
+            <pre><code>[
+  {
+    "emsCode": "ALM_001",
+    "ossDescription": "Link Down",
+    "severity": "critical"
+  },
+  {
+    "emsCode": "ALM_002",
+    "ossDescription": "High CPU Usage",
+    "severity": "major"
+  }
+]</code></pre>
+
+            <div class="note warning">
+                <p class="note-title">Note</p>
+                <p>Mappings are stored in your browser's local storage. Export regularly to avoid data loss when clearing browser data.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Payload Transformer -->
+        <section id="payload-transformer" class="section">
+            <h2>5. Payload Transformer</h2>
+
+            <h3>Supported Formats</h3>
+            <table>
+                <tr>
+                    <th>Format</th>
+                    <th>Description</th>
+                    <th>Use Case</th>
+                </tr>
+                <tr>
+                    <td>JSON</td>
+                    <td>JavaScript Object Notation</td>
+                    <td>REST APIs, modern systems</td>
+                </tr>
+                <tr>
+                    <td>XML</td>
+                    <td>Extensible Markup Language</td>
+                    <td>SOAP, NETCONF, legacy systems</td>
+                </tr>
+                <tr>
+                    <td>CSV</td>
+                    <td>Comma-Separated Values</td>
+                    <td>Spreadsheets, data import/export</td>
+                </tr>
+                <tr>
+                    <td>YAML</td>
+                    <td>YAML Ain't Markup Language</td>
+                    <td>Configuration files, Ansible</td>
+                </tr>
+            </table>
+
+            <h3>How to Transform</h3>
+            <ol>
+                <li>Select the "Payload Transformer" tab</li>
+                <li>Choose the source format from the dropdown</li>
+                <li>Paste your data in the input area</li>
+                <li>Select the target format</li>
+                <li>Click "Transform"</li>
+                <li>Copy or download the result</li>
+            </ol>
+
+            <h4>Example: JSON to XML</h4>
+            <p><strong>Input (JSON):</strong></p>
+            <pre><code>{
+  "alarm": {
+    "id": "12345",
+    "severity": "critical",
+    "source": "router-01"
+  }
+}</code></pre>
+
+            <p><strong>Output (XML):</strong></p>
+            <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;alarm&gt;
+  &lt;id&gt;12345&lt;/id&gt;
+  &lt;severity&gt;critical&lt;/severity&gt;
+  &lt;source&gt;router-01&lt;/source&gt;
+&lt;/alarm&gt;</code></pre>
+
+            <h3>Working with CSV</h3>
+            <p>When converting to/from CSV:</p>
+            <ul>
+                <li>The first row is treated as headers</li>
+                <li>Arrays are converted to multiple rows</li>
+                <li>Nested objects are flattened</li>
+            </ul>
+
+            <div class="note">
+                <p class="note-title">Tip</p>
+                <p>Use "Format/Prettify" button to clean up minified or messy data before transforming.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: SNMP OID Browser -->
+        <section id="snmp-oid" class="section">
+            <h2>6. SNMP OID Browser</h2>
+
+            <h3>Features</h3>
+            <ul>
+                <li><strong>OID Decoder</strong> - Decode numeric OIDs to human-readable names</li>
+                <li><strong>Walk Parser</strong> - Parse SNMP walk output into structured data</li>
+                <li><strong>MIB Browser</strong> - Browse common MIB trees</li>
+            </ul>
+
+            <h3>OID Decoder</h3>
+            <ol>
+                <li>Select "Decode OID" mode</li>
+                <li>Enter an OID (e.g., <code>1.3.6.1.2.1.1.1.0</code>)</li>
+                <li>Click "Decode"</li>
+                <li>View the breakdown of each OID component</li>
+            </ol>
+
+            <h4>Example OID Breakdown</h4>
+            <pre><code>1.3.6.1.2.1.1.1.0 = sysDescr.0
+
+Breakdown:
+1      = iso
+1.3    = org
+1.3.6  = dod
+1.3.6.1 = internet
+1.3.6.1.2 = mgmt
+1.3.6.1.2.1 = mib-2
+1.3.6.1.2.1.1 = system
+1.3.6.1.2.1.1.1 = sysDescr</code></pre>
+
+            <h3>Common OID Prefixes</h3>
+            <table>
+                <tr>
+                    <th>OID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>1.3.6.1.2.1.1</td>
+                    <td>system</td>
+                    <td>System information</td>
+                </tr>
+                <tr>
+                    <td>1.3.6.1.2.1.2</td>
+                    <td>interfaces</td>
+                    <td>Interface statistics</td>
+                </tr>
+                <tr>
+                    <td>1.3.6.1.2.1.4</td>
+                    <td>ip</td>
+                    <td>IP protocol statistics</td>
+                </tr>
+                <tr>
+                    <td>1.3.6.1.4.1</td>
+                    <td>enterprises</td>
+                    <td>Vendor-specific MIBs</td>
+                </tr>
+            </table>
+
+            <h3>SNMP Walk Parser</h3>
+            <ol>
+                <li>Select "Parse Walk" mode</li>
+                <li>Paste your SNMP walk output</li>
+                <li>Click "Parse"</li>
+                <li>View the structured table of OIDs and values</li>
+            </ol>
+
+            <h4>Example Walk Input</h4>
+            <pre><code>SNMPv2-MIB::sysDescr.0 = STRING: Cisco IOS Software
+SNMPv2-MIB::sysObjectID.0 = OID: SNMPv2-SMI::enterprises.9.1.1
+SNMPv2-MIB::sysUpTime.0 = Timeticks: (123456789) 14 days, 6:56:07.89
+SNMPv2-MIB::sysContact.0 = STRING: admin@example.com
+SNMPv2-MIB::sysName.0 = STRING: router-01
+SNMPv2-MIB::sysLocation.0 = STRING: Data Center 1</code></pre>
+
+            <h3>MIB Browser</h3>
+            <p>Browse the standard MIB tree to find OIDs. Click on any node to expand and see child objects.</p>
+        </section>
+
+        <!-- Section 7: NETCONF/XML Tools -->
+        <section id="netconf-xml" class="section">
+            <h2>7. NETCONF/XML Tools</h2>
+
+            <h3>Features</h3>
+            <ul>
+                <li><strong>XML Validator</strong> - Check XML syntax and well-formedness</li>
+                <li><strong>XPath Tester</strong> - Test XPath expressions against XML</li>
+                <li><strong>XML Formatter</strong> - Prettify or minify XML</li>
+            </ul>
+
+            <h3>XML Validator</h3>
+            <ol>
+                <li>Select "Validate XML" mode</li>
+                <li>Paste your XML content</li>
+                <li>Click "Validate"</li>
+                <li>View validation results and any errors with line numbers</li>
+            </ol>
+
+            <h3>XPath Tester</h3>
+            <ol>
+                <li>Select "XPath Tester" mode</li>
+                <li>Paste your XML in the document area</li>
+                <li>Enter an XPath expression (e.g., <code>//interface/name</code>)</li>
+                <li>Click "Test XPath"</li>
+                <li>View matching nodes</li>
+            </ol>
+
+            <h4>Common XPath Examples</h4>
+            <table>
+                <tr>
+                    <th>XPath</th>
+                    <th>Selects</th>
+                </tr>
+                <tr>
+                    <td><code>//element</code></td>
+                    <td>All elements with that name</td>
+                </tr>
+                <tr>
+                    <td><code>/root/child</code></td>
+                    <td>Child elements under root</td>
+                </tr>
+                <tr>
+                    <td><code>//element[@attr='value']</code></td>
+                    <td>Elements with specific attribute</td>
+                </tr>
+                <tr>
+                    <td><code>//element/text()</code></td>
+                    <td>Text content of elements</td>
+                </tr>
+                <tr>
+                    <td><code>//element[1]</code></td>
+                    <td>First matching element</td>
+                </tr>
+            </table>
+
+            <h3>NETCONF Example</h3>
+            <pre><code>&lt;rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"&gt;
+  &lt;get-config&gt;
+    &lt;source&gt;
+      &lt;running/&gt;
+    &lt;/source&gt;
+    &lt;filter type="subtree"&gt;
+      &lt;interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"&gt;
+        &lt;interface&gt;
+          &lt;name/&gt;
+          &lt;enabled/&gt;
+        &lt;/interface&gt;
+      &lt;/interfaces&gt;
+    &lt;/filter&gt;
+  &lt;/get-config&gt;
+&lt;/rpc&gt;</code></pre>
+
+            <div class="note">
+                <p class="note-title">Tip</p>
+                <p>When working with namespaced XML (common in NETCONF), you may need to use local-name() in XPath: <code>//*[local-name()='interface']</code></p>
+            </div>
+        </section>
+
+        <!-- Section 8: E2E Integration Generator -->
+        <section id="e2e-generator" class="section">
+            <h2>8. E2E Integration Generator</h2>
+
+            <h3>Overview</h3>
+            <p>The E2E Integration Solution Generator is a comprehensive wizard that guides you through designing complete integration solutions. It automatically generates architecture diagrams, code artifacts, and deployment configurations based on your requirements.</p>
+
+            <h3>Four-Phase Approach</h3>
+            <table>
+                <tr>
+                    <th>Phase</th>
+                    <th>Description</th>
+                    <th>Output</th>
+                </tr>
+                <tr>
+                    <td>1. Requirements</td>
+                    <td>Define project, source, destination, mappings, and rules</td>
+                    <td>Captured specifications</td>
+                </tr>
+                <tr>
+                    <td>2. Design</td>
+                    <td>Auto-generated solution architecture</td>
+                    <td>Flow diagrams, architecture diagrams</td>
+                </tr>
+                <tr>
+                    <td>3. Development</td>
+                    <td>Generated code and configurations</td>
+                    <td>Code, database schemas, infrastructure configs</td>
+                </tr>
+                <tr>
+                    <td>4. Execution</td>
+                    <td>Deployment and testing artifacts</td>
+                    <td>Scripts, test suites, documentation</td>
+                </tr>
+            </table>
+
+            <h3>Phase 1: Requirements</h3>
+            <p>Capture all integration requirements through six sub-sections:</p>
+
+            <h4>1.1 Project Details</h4>
+            <ul>
+                <li><strong>Project Name</strong> - Unique identifier for your integration (required)</li>
+                <li><strong>Description</strong> - Brief description of the integration purpose</li>
+                <li><strong>Integration Type</strong> - ETL/Batch, Real-time Streaming, API Integration, or Hybrid</li>
+                <li><strong>Pattern</strong> - Point-to-Point, Hub-and-Spoke, Publish-Subscribe, or Event-Driven</li>
+                <li><strong>Tech Stack</strong> - Java/Spring Boot, Python, or Node.js</li>
+            </ul>
+
+            <h4>1.2 Source System</h4>
+            <ul>
+                <li><strong>System Type</strong> - Database, REST API, File System, Message Queue, FTP/SFTP</li>
+                <li><strong>System Name</strong> - Identifier for the source system (required)</li>
+                <li><strong>Data Format</strong> - JSON, XML, CSV, Avro, or Parquet</li>
+                <li><strong>Connection Details</strong> - Connection string or endpoint</li>
+                <li><strong>Schema Definition</strong> - Sample data or schema structure (required)</li>
+            </ul>
+
+            <h4>1.3 Destination System</h4>
+            <p>Same configuration options as Source System for the target endpoint.</p>
+
+            <h4>1.4 Data Mapping</h4>
+            <ul>
+                <li><strong>Source Field</strong> - Field name from source system</li>
+                <li><strong>Destination Field</strong> - Corresponding field in destination</li>
+                <li><strong>Transformation</strong> - Direct Copy, Concatenate, Split, Lookup, Format/Convert, or Custom Logic</li>
+            </ul>
+            <p>At least one field mapping is required.</p>
+
+            <h4>1.5 Business Rules (Optional)</h4>
+            <ul>
+                <li><strong>Rule Name</strong> - Descriptive name for the rule</li>
+                <li><strong>Action</strong> - Filter/Exclude, Transform, Route/Split, Aggregate, Enrich, or Validate</li>
+                <li><strong>Condition</strong> - Logic expression (e.g., WHERE status = 'ACTIVE')</li>
+            </ul>
+
+            <div class="note warning">
+                <p class="note-title">Warning</p>
+                <p>If no business rules are defined, a warning will be shown recommending you add validation or transformation rules.</p>
+            </div>
+
+            <h4>1.6 Technical Requirements</h4>
+            <ul>
+                <li><strong>Error Handling</strong> - Retry with Backoff, Dead Letter Queue, Alert & Skip, or Fail Fast</li>
+                <li><strong>Logging Level</strong> - Debug, Info, Warning, or Error Only</li>
+                <li><strong>Scheduling</strong> - Real-time, Hourly Batch, Daily Batch, or Custom Cron</li>
+                <li><strong>Performance Target</strong> - Records per second</li>
+                <li><strong>Security</strong> - Data Encryption, Authentication, Data Masking, Audit Logging</li>
+            </ul>
+
+            <div class="note warning">
+                <p class="note-title">Warning</p>
+                <p>If no security requirements are selected, a warning will be shown recommending you enable encryption, authentication, or data masking.</p>
+            </div>
+
+            <h3>Phase 2: Design</h3>
+            <p>After clicking "Generate Design", the system creates:</p>
+
+            <h4>Solution Flow Diagram</h4>
+            <p>A Mermaid.js flowchart showing the data flow from source through transformation to destination, including error handling paths.</p>
+
+            <h4>Architecture Diagram</h4>
+            <p>A component diagram showing the integration architecture with all layers and connections.</p>
+
+            <h4>Component Breakdown</h4>
+            <p>Table listing all components with their purpose, technology, and status.</p>
+
+            <h4>Dataflow Specification</h4>
+            <p>Step-by-step specification of data transformations and validations.</p>
+
+            <div class="note">
+                <p class="note-title">Tip</p>
+                <p>You can copy Mermaid diagram code to use in documentation tools like Notion, Confluence, or GitHub markdown.</p>
+            </div>
+
+            <h3>Phase 3: Development Artifacts</h3>
+            <p>Generated code artifacts based on your selected tech stack:</p>
+
+            <h4>Core Integration Code</h4>
+            <ul>
+                <li>Main application/service class</li>
+                <li>Source connector implementation</li>
+                <li>Destination connector implementation</li>
+                <li>Data transformer with mapping logic</li>
+                <li>Validator with business rules</li>
+            </ul>
+
+            <h4>Job Orchestration</h4>
+            <ul>
+                <li>Apache Airflow DAG definition</li>
+                <li>Kubernetes CronJob manifest</li>
+                <li>Shell script scheduler</li>
+            </ul>
+
+            <h4>Database Scripts</h4>
+            <ul>
+                <li>Staging tables DDL</li>
+                <li>Error logging tables</li>
+                <li>Audit trail tables</li>
+            </ul>
+
+            <h4>Infrastructure as Code</h4>
+            <ul>
+                <li>Terraform modules</li>
+                <li>Docker Compose configuration</li>
+                <li>Kubernetes deployment manifests</li>
+            </ul>
+
+            <h4>Monitoring Configuration</h4>
+            <ul>
+                <li>Prometheus metrics configuration</li>
+                <li>Grafana dashboard JSON</li>
+                <li>Alert rules</li>
+            </ul>
+
+            <h3>Phase 4: Execution Framework</h3>
+            <p>Final deployment and testing artifacts:</p>
+
+            <h4>Execution Scripts</h4>
+            <ul>
+                <li><code>run.sh</code> / <code>run.bat</code> - Main execution script</li>
+                <li><code>setup.sh</code> - Environment setup</li>
+                <li><code>health-check.sh</code> - Health verification</li>
+            </ul>
+
+            <h4>Test Suite</h4>
+            <ul>
+                <li>Unit test templates</li>
+                <li>Integration test templates</li>
+                <li>Sample test data</li>
+            </ul>
+
+            <h4>Deployment Guide</h4>
+            <p>Complete markdown documentation with prerequisites, step-by-step deployment instructions, and troubleshooting guide.</p>
+
+            <h3>Export Options</h3>
+            <ul>
+                <li><strong>Download All</strong> - Complete project as ZIP file with folder structure</li>
+                <li><strong>Copy Code</strong> - Copy individual artifacts to clipboard</li>
+                <li><strong>Copy Diagrams</strong> - Copy Mermaid code for use in other tools</li>
+            </ul>
+
+            <h3>Validation & Error Handling</h3>
+            <p>The generator includes built-in validation:</p>
+            <table>
+                <tr>
+                    <th>Validation</th>
+                    <th>Type</th>
+                    <th>Message</th>
+                </tr>
+                <tr>
+                    <td>Project Name empty</td>
+                    <td>Error</td>
+                    <td>Project Name is required</td>
+                </tr>
+                <tr>
+                    <td>Source Schema empty</td>
+                    <td>Error</td>
+                    <td>Source Schema is required</td>
+                </tr>
+                <tr>
+                    <td>Destination Schema empty</td>
+                    <td>Error</td>
+                    <td>Destination Schema is required</td>
+                </tr>
+                <tr>
+                    <td>No field mappings</td>
+                    <td>Error</td>
+                    <td>At least one field mapping is required</td>
+                </tr>
+                <tr>
+                    <td>No business rules</td>
+                    <td>Warning</td>
+                    <td>Consider adding validation or transformation rules</td>
+                </tr>
+                <tr>
+                    <td>No security options</td>
+                    <td>Warning</td>
+                    <td>Consider enabling encryption or authentication</td>
+                </tr>
+            </table>
+
+            <div class="note success">
+                <p class="note-title">Auto-Trim Feature</p>
+                <p>All text input fields automatically trim leading and trailing whitespace when you leave the field, ensuring clean data for code generation.</p>
+            </div>
+        </section>
+
+        <!-- Section 9: XML Parser -->
+        <section id="xml-parser" class="section">
+            <h2>9. XML Parser</h2>
+
+            <p>The XML Parser tab has two modes accessible via the toggle at the top: <strong>Parse &amp; Flatten</strong> and <strong>Compare XML</strong>.</p>
+
+            <!-- 9.1 Parse & Flatten -->
+            <h3>9.1 Parse &amp; Flatten</h3>
+
+            <p>Extracts every element, attribute, and text value from an XML document into a clean 4-column table. Each attribute of each element becomes its own row — no wide dynamic columns, all values stored as plain text.</p>
+
+            <h4>Output Columns</h4>
+            <table>
+                <tr>
+                    <th>Column</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>Path</td>
+                    <td>Full XPath-like location of the element</td>
+                    <td><code>ManagedObjects/ManagedElement/Slot/Port</code></td>
+                </tr>
+                <tr>
+                    <td>Element</td>
+                    <td>Tag name of the element</td>
+                    <td><code>Port</code></td>
+                </tr>
+                <tr>
+                    <td>Attribute</td>
+                    <td>Attribute name, or <code>#text</code> for direct text content</td>
+                    <td><code>speed</code>, <code>#text</code></td>
+                </tr>
+                <tr>
+                    <td>Value</td>
+                    <td>Attribute or text value as plain text</td>
+                    <td><code>100G</code>, <code>Loss of Signal</code></td>
+                </tr>
+            </table>
+
+            <h4>How to Use</h4>
+            <ol>
+                <li>Click the <strong>XML Parser</strong> tab — it opens in <strong>Parse &amp; Flatten</strong> mode by default</li>
+                <li>Paste XML into the textarea <em>or</em> click <strong>Upload XML</strong> to load a <code>.xml</code> / <code>.txt</code> file</li>
+                <li>Click <strong>Parse XML</strong></li>
+                <li>Review the results — one row per attribute/text value, across all elements</li>
+                <li>Click <strong>Download CSV</strong> to save as <code>xml_parsed_elements.csv</code>, or <strong>Copy Table</strong> for tab-separated clipboard data (Excel-compatible)</li>
+            </ol>
+
+            <h4>Example Input</h4>
+            <pre><code>&lt;ManagedObjects&gt;
+  &lt;ManagedElement id="NE-WEST-01" type="OTN" vendor="Huawei"&gt;
+    &lt;Slot name="SLOT-1" adminState="IS"&gt;
+      &lt;Port id="P1" speed="100G"/&gt;
+    &lt;/Slot&gt;
+    &lt;Alarm id="ALM-001" severity="MAJOR"&gt;Loss of Signal&lt;/Alarm&gt;
+  &lt;/ManagedElement&gt;
+&lt;/ManagedObjects&gt;</code></pre>
+
+            <h4>Resulting CSV</h4>
+            <pre><code>Path,Element,Attribute,Value
+ManagedObjects/ManagedElement,ManagedElement,id,NE-WEST-01
+ManagedObjects/ManagedElement,ManagedElement,type,OTN
+ManagedObjects/ManagedElement,ManagedElement,vendor,Huawei
+ManagedObjects/ManagedElement/Slot,Slot,name,SLOT-1
+ManagedObjects/ManagedElement/Slot,Slot,adminState,IS
+ManagedObjects/ManagedElement/Slot/Port,Port,id,P1
+ManagedObjects/ManagedElement/Slot/Port,Port,speed,100G
+ManagedObjects/ManagedElement/Alarm,Alarm,id,ALM-001
+ManagedObjects/ManagedElement/Alarm,Alarm,severity,MAJOR
+ManagedObjects/ManagedElement/Alarm,Alarm,#text,Loss of Signal</code></pre>
+
+            <div class="note">
+                <p class="note-title">Tip</p>
+                <p>Because each attribute is its own row, the table always has exactly 4 columns regardless of how many different attributes exist in the file. This makes it much easier to sort and filter in Excel or any CSV tool.</p>
+            </div>
+
+            <!-- 9.2 Compare XML -->
+            <h3>9.2 Compare XML</h3>
+
+            <p>Compares two XML files attribute-by-attribute and highlights what was added, removed, modified, or unchanged between them. Useful for detecting configuration drift, comparing EMS exports across maintenance windows, or validating changes before and after a network upgrade.</p>
+
+            <h4>How to Use</h4>
+            <ol>
+                <li>Click the <strong>XML Parser</strong> tab then select <strong>Compare XML</strong> mode</li>
+                <li>Paste or upload the base XML into <strong>XML 1 — Base</strong></li>
+                <li>Paste or upload the changed XML into <strong>XML 2 — Modified</strong></li>
+                <li>Click <strong>Compare</strong></li>
+                <li>Review the colour-coded summary bar and results table</li>
+                <li>Use the filter buttons to focus on specific change types</li>
+                <li>Click <strong>Download CSV</strong> to export the visible (filtered) results</li>
+            </ol>
+
+            <div class="note">
+                <p class="note-title">Load Sample</p>
+                <p>Click <strong>Load Sample</strong> on each side to load pre-built EMS XMLs with deliberate differences — a quick way to explore the feature without your own files.</p>
+            </div>
+
+            <h4>Comparison Output Columns</h4>
+            <table>
+                <tr>
+                    <th>Column</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Path</td>
+                    <td>XPath-like location of the element in the document tree</td>
+                </tr>
+                <tr>
+                    <td>Element</td>
+                    <td>Tag name of the element</td>
+                </tr>
+                <tr>
+                    <td>Attribute</td>
+                    <td>Attribute name (or <code>#text</code> for text content)</td>
+                </tr>
+                <tr>
+                    <td>Value (XML 1)</td>
+                    <td>Value from the base XML; blank if the attribute did not exist</td>
+                </tr>
+                <tr>
+                    <td>Value (XML 2)</td>
+                    <td>Value from the modified XML; blank if the attribute was removed</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>Added / Removed / Modified / Unchanged</td>
+                </tr>
+            </table>
+
+            <h4>Status Colour Coding</h4>
+            <table>
+                <tr>
+                    <th>Status</th>
+                    <th>Colour</th>
+                    <th>Meaning</th>
+                </tr>
+                <tr>
+                    <td><strong>Added</strong></td>
+                    <td class="bg-added">Green</td>
+                    <td>Attribute/element exists only in XML 2 (new in modified file)</td>
+                </tr>
+                <tr>
+                    <td><strong>Removed</strong></td>
+                    <td class="bg-removed">Red</td>
+                    <td>Attribute/element exists only in XML 1 (deleted in modified file)</td>
+                </tr>
+                <tr>
+                    <td><strong>Modified</strong></td>
+                    <td class="bg-modified">Yellow</td>
+                    <td>Attribute exists in both files but the value has changed</td>
+                </tr>
+                <tr>
+                    <td><strong>Unchanged</strong></td>
+                    <td>—</td>
+                    <td>Attribute exists in both files with identical value</td>
+                </tr>
+            </table>
+
+            <h4>Filter Buttons</h4>
+            <table>
+                <tr>
+                    <th>Filter</th>
+                    <th>Shows</th>
+                </tr>
+                <tr>
+                    <td>All</td>
+                    <td>Every row regardless of status</td>
+                </tr>
+                <tr>
+                    <td>Changed only</td>
+                    <td>Added + Removed + Modified (excludes Unchanged)</td>
+                </tr>
+                <tr>
+                    <td>Added</td>
+                    <td>Only rows with status Added</td>
+                </tr>
+                <tr>
+                    <td>Removed</td>
+                    <td>Only rows with status Removed</td>
+                </tr>
+                <tr>
+                    <td>Modified</td>
+                    <td>Only rows with status Modified</td>
+                </tr>
+            </table>
+
+            <div class="note warning">
+                <p class="note-title">How paths are matched</p>
+                <p>Comparison is done by matching <code>Path + Attribute</code> as a unique key. If the same element tag appears multiple times at the same level (e.g., two <code>&lt;Port&gt;</code> elements under <code>&lt;Slot&gt;</code>), they share the same path key. Differences in repeated elements may appear as Modified rather than Added/Removed. For best results, ensure repeated elements carry a unique identifying attribute (e.g., <code>id</code> or <code>name</code>).</p>
+            </div>
+
+            <div class="note warning">
+                <p class="note-title">Large Files</p>
+                <p>All parsing and comparison is done in the browser. Very large XML files may take a few seconds to process.</p>
+            </div>
+        </section>
+
+        <!-- Section 10: JSON Parser -->
+        <section id="json-parser" class="section">
+            <h2>10. JSON Parser</h2>
+
+            <h3>Purpose</h3>
+            <p>The JSON Parser flattens any nested JSON structure — objects and arrays — into a simple three-column table showing the full dot-notation path, value type, and value. This makes it easy to inspect deeply nested API responses, EMS inventory exports, or configuration payloads without writing code.</p>
+
+            <h3>Output Columns</h3>
+            <table>
+                <tr>
+                    <th>Column</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>Path</td>
+                    <td>Dot-notation path to the value; arrays use <code>[n]</code> index notation</td>
+                    <td><code>managedElements[0].slots[1].ports[0].speed</code></td>
+                </tr>
+                <tr>
+                    <td>Type</td>
+                    <td>JavaScript type of the leaf value</td>
+                    <td><code>string</code>, <code>number</code>, <code>boolean</code>, <code>null</code></td>
+                </tr>
+                <tr>
+                    <td>Value</td>
+                    <td>The actual value as a string</td>
+                    <td><code>100G</code></td>
+                </tr>
+            </table>
+
+            <h3>How to Use</h3>
+            <ol>
+                <li>Click the <strong>JSON Parser</strong> tab</li>
+                <li>Paste JSON into the textarea <em>or</em> click <strong>Upload JSON</strong> to load a <code>.json</code> / <code>.txt</code> file</li>
+                <li>Click <strong>Parse JSON</strong></li>
+                <li>Review the flattened table — one row per leaf value</li>
+                <li>Click <strong>Download CSV</strong> to save as <code>json_parsed_values.csv</code>, or <strong>Copy Table</strong> for paste into Excel</li>
+            </ol>
+
+            <h4>Example Input</h4>
+            <pre><code>{
+  "managedElements": [
+    {
+      "id": "NE-WEST-01",
+      "type": "OTN",
+      "slots": [
+        { "name": "SLOT-1", "adminState": "IS" }
+      ]
+    }
+  ]
+}</code></pre>
+
+            <h4>Resulting CSV</h4>
+            <pre><code>Path,Type,Value
+managedElements[0].id,string,NE-WEST-01
+managedElements[0].type,string,OTN
+managedElements[0].slots[0].name,string,SLOT-1
+managedElements[0].slots[0].adminState,string,IS</code></pre>
+
+            <h3>Special Cases</h3>
+            <table>
+                <tr>
+                    <th>Input</th>
+                    <th>Path</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td><code>null</code></td>
+                    <td>path.to.field</td>
+                    <td>null</td>
+                    <td>null</td>
+                </tr>
+                <tr>
+                    <td>Empty array <code>[]</code></td>
+                    <td>path.to.field</td>
+                    <td>array</td>
+                    <td>[]</td>
+                </tr>
+                <tr>
+                    <td>Empty object <code>{}</code></td>
+                    <td>path.to.field</td>
+                    <td>object</td>
+                    <td>{}</td>
+                </tr>
+                <tr>
+                    <td>Boolean</td>
+                    <td>path.to.field</td>
+                    <td>boolean</td>
+                    <td>true / false</td>
+                </tr>
+            </table>
+
+            <div class="note">
+                <p class="note-title">Tip</p>
+                <p>Use <strong>Load Sample</strong> to see a realistic EMS managed elements JSON with nested slots, ports, and alarms — a good reference for understanding the path notation.</p>
+            </div>
+        </section>
+
+        <!-- Section 11: Tips & Best Practices -->
+        <section id="tips" class="section">
+            <h2>11. Tips & Best Practices</h2>
+
+            <h3>General Tips</h3>
+            <ul>
+                <li><strong>Use keyboard shortcuts</strong> - Ctrl+V to paste, Ctrl+C to copy results</li>
+                <li><strong>Export regularly</strong> - Back up your alarm mappings to avoid data loss</li>
+                <li><strong>Validate first</strong> - Always validate XML/JSON before transformation</li>
+                <li><strong>Use formatting</strong> - Prettify data for easier reading and debugging</li>
+            </ul>
+
+            <h3>Troubleshooting</h3>
+            <table>
+                <tr>
+                    <th>Issue</th>
+                    <th>Solution</th>
+                </tr>
+                <tr>
+                    <td>TL1 parsing fails</td>
+                    <td>Ensure command ends with semicolon (;) and uses correct separators (:)</td>
+                </tr>
+                <tr>
+                    <td>XML validation error</td>
+                    <td>Check for unclosed tags, special characters (&, <, >) need escaping</td>
+                </tr>
+                <tr>
+                    <td>JSON parsing fails</td>
+                    <td>Validate quotes (use double quotes), check for trailing commas</td>
+                </tr>
+                <tr>
+                    <td>Mappings not saving</td>
+                    <td>Check if browser allows localStorage; try a different browser</td>
+                </tr>
+                <tr>
+                    <td>OID not recognized</td>
+                    <td>The OID may be vendor-specific; check vendor MIB documentation</td>
+                </tr>
+            </table>
+
+            <h3>Browser Compatibility</h3>
+            <p>For best experience, use the latest version of:</p>
+            <ul>
+                <li>Google Chrome (recommended)</li>
+                <li>Mozilla Firefox</li>
+                <li>Microsoft Edge</li>
+                <li>Apple Safari</li>
+            </ul>
+
+            <div class="note success">
+                <p class="note-title">Need Help?</p>
+                <p>For questions or feedback, visit our other tools: <a href="https://create-your-qr.web.app">QR Code Generator</a> | <a href="https://imgtools.web.app">Image Resizer</a></p>
+            </div>
+        </section>
+    </div>
+
+    <footer class="doc-footer">
+        <p>EMS Integration Toolkit - User Guide v1.0</p>
+        <p>© 2025 Create Your QR | <a href="https://emstools.web.app">emstools.web.app</a></p>
+    </footer>
+</body>
+</html>
