@@ -57,6 +57,28 @@ const UsageTracker = {
 };
 
 // ==========================================
+// BUTTON LOADER UTILITY
+// ==========================================
+function withLoader(btn, fn) {
+    if (btn._loading) return;
+    btn._loading = true;
+    const origHtml = btn.innerHTML;
+    btn.style.minWidth = btn.offsetWidth + 'px';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-spinner"></span>Processing…';
+    // setTimeout defers fn() to next macrotask so browser paints the loading state first
+    setTimeout(() => {
+        try { fn(); }
+        finally {
+            btn._loading = false;
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+            btn.style.minWidth = '';
+        }
+    }, 30);
+}
+
+// ==========================================
 // TOAST NOTIFICATION SYSTEM
 // ==========================================
 const ToastManager = {
@@ -288,7 +310,7 @@ document.querySelectorAll('#tl1ParseMode .format-btn').forEach(btn => {
 });
 
 // Parse TL1 Response
-document.getElementById('tl1ParseBtn').addEventListener('click', () => {
+document.getElementById('tl1ParseBtn').addEventListener('click', function() {
     const input = document.getElementById('tl1Input').value.trim();
 
     if (Validator.isEmpty(input)) {
@@ -298,26 +320,25 @@ document.getElementById('tl1ParseBtn').addEventListener('click', () => {
     }
 
     Validator.clearError('tl1Input');
-    UsageTracker.increment('tl1');
-
-    try {
-        const parsed = parseTl1Response(input);
-
-        if (!parsed.header.tid && !parsed.status && parsed.data.length === 0) {
-            ToastManager.warning('Parse Warning', 'Could not identify TL1 structure. Check the format.');
+    withLoader(this, () => {
+        UsageTracker.increment('tl1');
+        try {
+            const parsed = parseTl1Response(input);
+            if (!parsed.header.tid && !parsed.status && parsed.data.length === 0) {
+                ToastManager.warning('Parse Warning', 'Could not identify TL1 structure. Check the format.');
+                showTl1FormatHint();
+            } else if (parsed.data.length === 0) {
+                ToastManager.info('No Data Rows', 'Header parsed but no data rows found in response.');
+            } else {
+                ToastManager.success('Parsed Successfully', `Found ${parsed.data.length} data row(s).`);
+            }
+            lastParsedTl1Data = parsed;
+            renderTl1Output(parsed);
+        } catch (err) {
+            ToastManager.error('Parse Error', err.message);
             showTl1FormatHint();
-        } else if (parsed.data.length === 0) {
-            ToastManager.info('No Data Rows', 'Header parsed but no data rows found in response.');
-        } else {
-            ToastManager.success('Parsed Successfully', `Found ${parsed.data.length} data row(s).`);
         }
-
-        lastParsedTl1Data = parsed;
-        renderTl1Output(parsed);
-    } catch (err) {
-        ToastManager.error('Parse Error', err.message);
-        showTl1FormatHint();
-    }
+    });
 });
 
 function showTl1FormatHint() {
@@ -489,7 +510,7 @@ function renderTl1Csv(data) {
 }
 
 // TL1 Command Builder
-document.getElementById('tl1GenerateBtn').addEventListener('click', () => {
+document.getElementById('tl1GenerateBtn').addEventListener('click', function() {
     const command = document.getElementById('tl1Command').value;
     const entity = document.getElementById('tl1Entity').value.trim().toUpperCase();
     const tid = document.getElementById('tl1Tid').value.trim();
@@ -497,30 +518,26 @@ document.getElementById('tl1GenerateBtn').addEventListener('click', () => {
     const ctag = document.getElementById('tl1Ctag').value.trim() || Math.floor(Math.random() * 99999);
     const params = document.getElementById('tl1Params').value.trim();
 
-    // Validation
     let hasError = false;
-
     if (Validator.isEmpty(entity)) {
         Validator.setError('tl1Entity', 'Entity type is required (e.g., EQPT, OTU, ODU)');
         hasError = true;
     } else {
         Validator.clearError('tl1Entity');
     }
-
     if (hasError) {
         ToastManager.warning('Validation Error', 'Please fill in required fields.');
         return;
     }
 
-    UsageTracker.increment('tl1');
-    let tl1Command = `${command}-${entity}:${tid}:${aid}:${ctag}`;
-    if (params) {
-        tl1Command += `::${params}`;
-    }
-    tl1Command += ';';
-
-    document.getElementById('tl1GeneratedOutput').textContent = tl1Command;
-    ToastManager.success('Command Generated', 'TL1 command is ready to copy.');
+    withLoader(this, () => {
+        UsageTracker.increment('tl1');
+        let tl1Command = `${command}-${entity}:${tid}:${aid}:${ctag}`;
+        if (params) tl1Command += `::${params}`;
+        tl1Command += ';';
+        document.getElementById('tl1GeneratedOutput').textContent = tl1Command;
+        ToastManager.success('Command Generated', 'TL1 command is ready to copy.');
+    });
 });
 
 // Sample TL1 Data
@@ -785,7 +802,7 @@ renderAlarmMappings();
 // ==========================================
 // PAYLOAD TRANSFORMER
 // ==========================================
-document.getElementById('transformBtn').addEventListener('click', () => {
+document.getElementById('transformBtn').addEventListener('click', function() {
     const input = document.getElementById('transformInput').value.trim();
     const inputFormat = document.getElementById('inputFormat').value;
     const outputFormat = document.getElementById('outputFormat').value;
@@ -797,6 +814,7 @@ document.getElementById('transformBtn').addEventListener('click', () => {
     }
 
     Validator.clearError('transformInput');
+    withLoader(this, () => {
     UsageTracker.increment('transform');
 
     try {
@@ -864,6 +882,7 @@ document.getElementById('transformBtn').addEventListener('click', () => {
         `;
         ToastManager.error('Transform Failed', 'Check your input format.');
     }
+    }); // withLoader
 });
 
 // XML to JSON conversion
@@ -1162,7 +1181,7 @@ window.selectOid = function(oid) {
 
 document.getElementById('mibSearch').addEventListener('input', renderMibTree);
 
-document.getElementById('decodeOidBtn').addEventListener('click', () => {
+document.getElementById('decodeOidBtn').addEventListener('click', function() {
     const oid = document.getElementById('oidInput').value.trim();
 
     if (Validator.isEmpty(oid)) {
@@ -1184,8 +1203,10 @@ document.getElementById('decodeOidBtn').addEventListener('click', () => {
         Validator.clearError('oidInput');
     }
 
-    UsageTracker.increment('snmp');
-    decodeOid(oid);
+    withLoader(this, () => {
+        UsageTracker.increment('snmp');
+        decodeOid(oid);
+    });
 });
 
 function decodeOid(oid) {
@@ -1226,7 +1247,7 @@ function decodeOid(oid) {
 }
 
 // SNMP Walk Formatter
-document.getElementById('formatSnmpBtn').addEventListener('click', () => {
+document.getElementById('formatSnmpBtn').addEventListener('click', function() {
     const input = document.getElementById('snmpWalkInput').value.trim();
 
     if (Validator.isEmpty(input)) {
@@ -1236,6 +1257,7 @@ document.getElementById('formatSnmpBtn').addEventListener('click', () => {
     }
 
     Validator.clearError('snmpWalkInput');
+    withLoader(this, () => {
     UsageTracker.increment('snmp');
 
     const lines = input.split('\n');
@@ -1293,6 +1315,7 @@ document.getElementById('formatSnmpBtn').addEventListener('click', () => {
 
     document.getElementById('snmpFormatOutput').innerHTML = html;
     ToastManager.success('Formatted', `Parsed ${data.length} SNMP entries.`);
+    });
 });
 
 document.getElementById('exportSnmpBtn').addEventListener('click', () => {
@@ -1392,7 +1415,7 @@ document.querySelectorAll('.template-btn').forEach(btn => {
     });
 });
 
-document.getElementById('formatXmlBtn').addEventListener('click', () => {
+document.getElementById('formatXmlBtn').addEventListener('click', function() {
     const input = document.getElementById('xmlInput').value;
 
     if (Validator.isEmpty(input)) {
@@ -1400,6 +1423,7 @@ document.getElementById('formatXmlBtn').addEventListener('click', () => {
         return;
     }
 
+    withLoader(this, () => {
     UsageTracker.increment('netconf');
     try {
         const formatted = formatXml(input);
@@ -1410,9 +1434,10 @@ document.getElementById('formatXmlBtn').addEventListener('click', () => {
         showValidation(false, 'Invalid XML: ' + err.message);
         ToastManager.error('Format Failed', 'Invalid XML structure.');
     }
+    });
 });
 
-document.getElementById('minifyXmlBtn').addEventListener('click', () => {
+document.getElementById('minifyXmlBtn').addEventListener('click', function() {
     const input = document.getElementById('xmlInput').value;
 
     if (Validator.isEmpty(input)) {
@@ -1420,6 +1445,7 @@ document.getElementById('minifyXmlBtn').addEventListener('click', () => {
         return;
     }
 
+    withLoader(this, () => {
     UsageTracker.increment('netconf');
     try {
         const parser = new DOMParser();
@@ -1435,9 +1461,10 @@ document.getElementById('minifyXmlBtn').addEventListener('click', () => {
         showValidation(false, 'Invalid XML');
         ToastManager.error('Minify Failed', 'Invalid XML structure.');
     }
+    });
 });
 
-document.getElementById('validateXmlBtn').addEventListener('click', () => {
+document.getElementById('validateXmlBtn').addEventListener('click', function() {
     const input = document.getElementById('xmlInput').value;
 
     if (Validator.isEmpty(input)) {
@@ -1445,6 +1472,7 @@ document.getElementById('validateXmlBtn').addEventListener('click', () => {
         return;
     }
 
+    withLoader(this, () => {
     UsageTracker.increment('netconf');
     const result = Validator.isValidXml(input);
     if (result.valid) {
@@ -1454,6 +1482,7 @@ document.getElementById('validateXmlBtn').addEventListener('click', () => {
         showValidation(false, 'Invalid XML: ' + result.error);
         ToastManager.error('Invalid', 'XML has syntax errors.');
     }
+    });
 });
 
 function showValidation(valid, message) {
@@ -1492,7 +1521,7 @@ function formatXml(xml) {
 }
 
 // XPath Tester
-document.getElementById('testXpathBtn').addEventListener('click', () => {
+document.getElementById('testXpathBtn').addEventListener('click', function() {
     const xml = document.getElementById('xmlInput').value;
     const xpath = document.getElementById('xpathInput').value;
 
@@ -1508,6 +1537,7 @@ document.getElementById('testXpathBtn').addEventListener('click', () => {
     }
 
     Validator.clearError('xpathInput');
+    withLoader(this, () => {
     UsageTracker.increment('netconf');
 
     try {
@@ -1555,6 +1585,7 @@ document.getElementById('testXpathBtn').addEventListener('click', () => {
         `;
         ToastManager.error('XPath Error', 'Invalid XPath expression or XML.');
     }
+    });
 });
 
 // ==========================================
@@ -1607,7 +1638,7 @@ document.querySelectorAll('#yangPanel .mode-btn').forEach(btn => {
 });
 
 // Parse YANG
-document.getElementById('parseYangBtn')?.addEventListener('click', () => {
+document.getElementById('parseYangBtn')?.addEventListener('click', function() {
     const input = document.getElementById('yangInput').value.trim();
 
     if (Validator.isEmpty(input)) {
@@ -1615,6 +1646,7 @@ document.getElementById('parseYangBtn')?.addEventListener('click', () => {
         return;
     }
 
+    withLoader(this, () => {
     UsageTracker.increment('yang');
     try {
         const parsed = parseYangModule(input);
@@ -1628,6 +1660,7 @@ document.getElementById('parseYangBtn')?.addEventListener('click', () => {
             </div>
         `;
     }
+    });
 });
 
 // Validate YANG
@@ -1665,7 +1698,7 @@ document.getElementById('validateYangBtn')?.addEventListener('click', () => {
 });
 
 // Compare YANG
-document.getElementById('compareYangBtn')?.addEventListener('click', () => {
+document.getElementById('compareYangBtn')?.addEventListener('click', function() {
     const input1 = document.getElementById('yangCompareInput1').value.trim();
     const input2 = document.getElementById('yangCompareInput2').value.trim();
 
@@ -1674,6 +1707,7 @@ document.getElementById('compareYangBtn')?.addEventListener('click', () => {
         return;
     }
 
+    withLoader(this, () => {
     UsageTracker.increment('yang');
     try {
         const comparison = compareYangModules(input1, input2);
@@ -1687,10 +1721,11 @@ document.getElementById('compareYangBtn')?.addEventListener('click', () => {
             </div>
         `;
     }
+    });
 });
 
 // Generate Tree View
-document.getElementById('generateTreeBtn')?.addEventListener('click', () => {
+document.getElementById('generateTreeBtn')?.addEventListener('click', function() {
     const input = document.getElementById('yangTreeInput').value.trim();
 
     if (Validator.isEmpty(input)) {
@@ -1698,6 +1733,7 @@ document.getElementById('generateTreeBtn')?.addEventListener('click', () => {
         return;
     }
 
+    withLoader(this, () => {
     UsageTracker.increment('yang');
     try {
         const tree = generateYangTree(input);
@@ -1711,6 +1747,7 @@ document.getElementById('generateTreeBtn')?.addEventListener('click', () => {
             </div>
         `;
     }
+    });
 });
 
 // Clear buttons
@@ -4586,11 +4623,13 @@ document.getElementById('copyArtifactCode')?.addEventListener('click', () => {
 });
 
 // Phase 3 -> Phase 4 (Generate Deployment)
-document.getElementById('e2eNextPhase3Btn')?.addEventListener('click', () => {
+document.getElementById('e2eNextPhase3Btn')?.addEventListener('click', function() {
+    withLoader(this, () => {
     UsageTracker.increment('e2e');
     generateDeploymentPhase();
     goToPhase(4);
     ToastManager.success('Deployment Ready', 'Execution scripts and guides generated.');
+    });
 });
 
 function generateDeploymentPhase() {
@@ -5570,7 +5609,7 @@ document.getElementById('swapFilesBtn')?.addEventListener('click', () => {
 // Compare button
 let lastCompareResults = null;
 
-document.getElementById('compareBtn')?.addEventListener('click', () => {
+document.getElementById('compareBtn')?.addEventListener('click', function() {
     const content1 = document.getElementById('file1Content').value;
     const content2 = document.getElementById('file2Content').value;
 
@@ -5579,6 +5618,7 @@ document.getElementById('compareBtn')?.addEventListener('click', () => {
         return;
     }
 
+    withLoader(this, () => {
     UsageTracker.increment('compare');
     const options = {
         ignoreWhitespace: document.getElementById('ignoreWhitespace').checked,
@@ -5599,6 +5639,7 @@ document.getElementById('compareBtn')?.addEventListener('click', () => {
     } catch (err) {
         ToastManager.error('Comparison Failed', err.message);
     }
+    });
 });
 
 // Copy diff
@@ -6289,9 +6330,11 @@ function parseAndRenderXml(xmlText) {
     ToastManager.success('XML Parsed', `${result.rows.length} rows extracted successfully.`);
 }
 
-document.getElementById('xmlParseBtn').addEventListener('click', () => {
+document.getElementById('xmlParseBtn').addEventListener('click', function() {
+    withLoader(this, () => {
     UsageTracker.increment('xml');
     parseAndRenderXml(document.getElementById('xmlParserInput').value);
+    });
 });
 
 document.getElementById('xmlParserClearBtn').addEventListener('click', () => {
@@ -6537,12 +6580,13 @@ function applyXmlCompareFilter(filter) {
     document.getElementById('xmlCompareRowCount').textContent = `Comparison Results — ${rows.length} row${rows.length !== 1 ? 's' : ''} shown`;
 }
 
-document.getElementById('xmlCompareBtn').addEventListener('click', () => {
+document.getElementById('xmlCompareBtn').addEventListener('click', function() {
     const text1 = document.getElementById('xmlCompare1Input').value.trim();
     const text2 = document.getElementById('xmlCompare2Input').value.trim();
     if (!text1 || !text2) { ToastManager.error('Input Required', 'Please provide both XML 1 and XML 2.'); return; }
 
     xmlCompareVendor = (document.getElementById('xmlCompareVendorSelect')?.value) || 'generic';
+    withLoader(this, () => {
     UsageTracker.increment('xml');
 
     if (xmlCompareVendor === 'nokia') {
@@ -6568,6 +6612,7 @@ document.getElementById('xmlCompareBtn').addEventListener('click', () => {
     document.getElementById('xmlCompareOutputSection').style.display = '';
     applyXmlCompareFilter('all');
     ToastManager.success('Compared', `${xmlCompareData.length} rows analysed.`);
+    });
 });
 
 document.getElementById('xmlCompareClearBtn').addEventListener('click', () => {
@@ -6782,9 +6827,11 @@ function parseAndRenderJson(jsonText) {
     ToastManager.success('JSON Parsed', `${tableRows.length} values extracted successfully.`);
 }
 
-document.getElementById('jsonParseBtn').addEventListener('click', () => {
+document.getElementById('jsonParseBtn').addEventListener('click', function() {
+    withLoader(this, () => {
     UsageTracker.increment('json');
     parseAndRenderJson(document.getElementById('jsonParserInput').value);
+    });
 });
 
 document.getElementById('jsonParserClearBtn').addEventListener('click', () => {
