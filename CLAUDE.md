@@ -5,7 +5,7 @@ A browser-based toolkit for Telecom OSS/BSS engineers providing utilities for EM
 
 **Live URL**: https://emstools.web.app
 **Firebase Project**: create-your-qr (hosting site: emstools)
-**Repository**: https://github.com/Sariswhka/create-your-qr/tree/main/ems-tools
+**Repository**: https://github.com/Sariswhka/OSS-toolkit
 
 ---
 
