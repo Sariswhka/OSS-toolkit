@@ -1690,6 +1690,14 @@ Example:
 
                     <!-- ── COMPARE MODE ── -->
                     <div class="xml-mode" id="xmlCompareMode" class="d-none">
+                        <div class="vendor-select-row">
+                            <label for="xmlCompareVendorSelect">Vendor Format:</label>
+                            <select id="xmlCompareVendorSelect" class="vendor-select">
+                                <option value="generic">Generic / AltioStar RAN</option>
+                                <option value="nokia">Nokia RAML 2.1</option>
+                                <option value="ericsson" disabled>Ericsson ENM (coming soon)</option>
+                            </select>
+                        </div>
                         <div class="d-grid-compare">
                             <!-- XML 1 -->
                             <div class="input-section" class="compare-input">

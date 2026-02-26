@@ -6370,6 +6370,39 @@ const XML_SAMPLE_2 = `<?xml version="1.0" encoding="UTF-8"?>
   </ManagedElement>
 </ManagedObjects>`;
 
+const XML_SAMPLE_NOKIA_2 = `<?xml version="1.0" encoding="UTF-8"?>
+<raml xmlns="raml21.xsd" version="2.1">
+<cmData type="actual" scope="all" id="1235">
+<header><log action="modify" dateTime="2021-05-10T09:00:00.000Z"/></header>
+<managedObject class="com.nokia.srbts:MRBTS" distName="MRBTS-1" version="SBTS21A_2103_001" operation="modify">
+  <p name="altitude">108</p>
+  <p name="btsName">4G RennesGare 1</p>
+  <p name="latitude">481026755</p>
+  <p name="longitude">-16726524</p>
+  <p name="txPower">43</p>
+</managedObject>
+<managedObject class="NOKLTE:LNBTS" distName="MRBTS-1/LNBTS-1" version="xL21A_2103_003" operation="modify">
+  <p name="mcc">208</p>
+  <p name="mnc">85</p>
+  <p name="operationalState">onAir</p>
+  <list name="qciTab1">
+    <item>
+      <p name="qci">1</p>
+      <p name="dscp">48</p>
+      <p name="resType">GBR</p>
+    </item>
+  </list>
+  <list name="ntpServerIpAddrList">
+    <p>192.168.19.5</p>
+  </list>
+</managedObject>
+<managedObject class="NOKLTE:LNCEL" distName="MRBTS-1/LNBTS-1/LNCEL-1" version="xL21A_2103_003" operation="create">
+  <p name="cellId">101</p>
+  <p name="earfcnDL">1300</p>
+</managedObject>
+</cmData>
+</raml>`;
+
 /**
  * Flatten XML into a Map keyed by "path|attribute" → value.
  * Reuses flattenXmlNode — each row is [path, element, attribute, value].
@@ -6434,6 +6467,61 @@ function renderXmlCompareTable(rows) {
     return html;
 }
 
+// ── Nokia-specific compare helpers ──────────────────────────────────────────
+
+function parseNokiaRamlToMap(xmlText) {
+    const { rows } = parseNokiaRaml(xmlText);
+    const map = new Map();
+    rows.forEach(([distName, cls, version, operation, listName, listIndex, paramName, value]) => {
+        const key = `${distName}||${cls}||${listName}||${listIndex}||${paramName}`;
+        map.set(key, { distName, cls, version, operation, listName, listIndex, paramName, value });
+    });
+    return map;
+}
+
+function compareNokiaMaps(map1, map2) {
+    const allKeys = new Set([...map1.keys(), ...map2.keys()]);
+    const rows = [];
+    for (const key of [...allKeys].sort()) {
+        const a = map1.get(key);
+        const b = map2.get(key);
+        if (a && b) {
+            const status = a.value === b.value ? 'unchanged' : 'modified';
+            rows.push({ distName: a.distName, cls: a.cls, listName: a.listName, listIndex: a.listIndex, paramName: a.paramName, value1: a.value, value2: b.value, status });
+        } else if (a) {
+            rows.push({ distName: a.distName, cls: a.cls, listName: a.listName, listIndex: a.listIndex, paramName: a.paramName, value1: a.value, value2: '', status: 'removed' });
+        } else {
+            rows.push({ distName: b.distName, cls: b.cls, listName: b.listName, listIndex: b.listIndex, paramName: b.paramName, value1: '', value2: b.value, status: 'added' });
+        }
+    }
+    return rows;
+}
+
+function renderNokiaCompareTable(rows) {
+    const headers = ['distName', 'class', 'listName', 'listIndex', 'paramName', 'Value (XML 1)', 'Value (XML 2)', 'Status'];
+    let html = '<table class="mapping-table tbl">';
+    html += '<thead><tr>' + headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr></thead>';
+    html += '<tbody>';
+    rows.forEach(r => {
+        html += `<tr class="${XML_STATUS_STYLE[r.status]}">`;
+        html += `<td class="tbl-cell-nowrap" title="${escapeHtml(r.distName)}">${escapeHtml(r.distName)}</td>`;
+        html += `<td class="tbl-cell-nowrap">${escapeHtml(r.cls)}</td>`;
+        html += `<td>${escapeHtml(r.listName)}</td>`;
+        html += `<td>${escapeHtml(String(r.listIndex))}</td>`;
+        html += `<td class="tbl-cell-nowrap">${escapeHtml(r.paramName)}</td>`;
+        html += `<td class="tbl-cell-val" title="${escapeHtml(r.value1)}">${escapeHtml(r.value1)}</td>`;
+        html += `<td class="tbl-cell-val" title="${escapeHtml(r.value2)}">${escapeHtml(r.value2)}</td>`;
+        html += `<td><strong>${XML_STATUS_LABEL[r.status]}</strong></td>`;
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    return html;
+}
+
+// ── Filter / render ──────────────────────────────────────────────────────────
+
+let xmlCompareVendor = 'generic';
+
 function applyXmlCompareFilter(filter) {
     xmlCompareFilter = filter;
     document.querySelectorAll('.xml-cmp-filter').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
@@ -6442,7 +6530,10 @@ function applyXmlCompareFilter(filter) {
     if (filter === 'added')    rows = rows.filter(r => r.status === 'added');
     if (filter === 'removed')  rows = rows.filter(r => r.status === 'removed');
     if (filter === 'modified') rows = rows.filter(r => r.status === 'modified');
-    document.getElementById('xmlCompareTableWrapper').innerHTML = renderXmlCompareTable(rows);
+    const tableHtml = xmlCompareVendor === 'nokia'
+        ? renderNokiaCompareTable(rows)
+        : renderXmlCompareTable(rows);
+    document.getElementById('xmlCompareTableWrapper').innerHTML = tableHtml;
     document.getElementById('xmlCompareRowCount').textContent = `Comparison Results — ${rows.length} row${rows.length !== 1 ? 's' : ''} shown`;
 }
 
@@ -6451,11 +6542,20 @@ document.getElementById('xmlCompareBtn').addEventListener('click', () => {
     const text2 = document.getElementById('xmlCompare2Input').value.trim();
     if (!text1 || !text2) { ToastManager.error('Input Required', 'Please provide both XML 1 and XML 2.'); return; }
 
-    let map1, map2;
-    try { map1 = flattenXmlToMap(text1); } catch (e) { ToastManager.error('Invalid XML 1', e.message); return; }
-    try { map2 = flattenXmlToMap(text2); } catch (e) { ToastManager.error('Invalid XML 2', e.message); return; }
+    xmlCompareVendor = (document.getElementById('xmlCompareVendorSelect')?.value) || 'generic';
+    UsageTracker.increment('xml');
 
-    xmlCompareData = compareXmlMaps(map1, map2);
+    if (xmlCompareVendor === 'nokia') {
+        let map1, map2;
+        try { map1 = parseNokiaRamlToMap(text1); } catch (e) { ToastManager.error('Invalid XML 1', e.message); return; }
+        try { map2 = parseNokiaRamlToMap(text2); } catch (e) { ToastManager.error('Invalid XML 2', e.message); return; }
+        xmlCompareData = compareNokiaMaps(map1, map2);
+    } else {
+        let map1, map2;
+        try { map1 = flattenXmlToMap(text1); } catch (e) { ToastManager.error('Invalid XML 1', e.message); return; }
+        try { map2 = flattenXmlToMap(text2); } catch (e) { ToastManager.error('Invalid XML 2', e.message); return; }
+        xmlCompareData = compareXmlMaps(map1, map2);
+    }
 
     const counts = { added: 0, removed: 0, modified: 0, unchanged: 0 };
     xmlCompareData.forEach(r => counts[r.status]++);
@@ -6467,7 +6567,7 @@ document.getElementById('xmlCompareBtn').addEventListener('click', () => {
     document.getElementById('xmlCompareSummary').style.display = 'block';
     document.getElementById('xmlCompareOutputSection').style.display = '';
     applyXmlCompareFilter('all');
-    ToastManager.success('Compared', `${xmlCompareData.length} attribute paths analysed.`);
+    ToastManager.success('Compared', `${xmlCompareData.length} rows analysed.`);
 });
 
 document.getElementById('xmlCompareClearBtn').addEventListener('click', () => {
@@ -6479,12 +6579,14 @@ document.getElementById('xmlCompareClearBtn').addEventListener('click', () => {
 });
 
 document.getElementById('xmlCompare1SampleBtn').addEventListener('click', () => {
-    document.getElementById('xmlCompare1Input').value = XML_SAMPLE;
+    const vendor = document.getElementById('xmlCompareVendorSelect')?.value || 'generic';
+    document.getElementById('xmlCompare1Input').value = vendor === 'nokia' ? XML_SAMPLE_NOKIA : XML_SAMPLE;
     ToastManager.info('Sample Loaded', 'Base XML loaded into XML 1.');
 });
 
 document.getElementById('xmlCompare2SampleBtn').addEventListener('click', () => {
-    document.getElementById('xmlCompare2Input').value = XML_SAMPLE_2;
+    const vendor = document.getElementById('xmlCompareVendorSelect')?.value || 'generic';
+    document.getElementById('xmlCompare2Input').value = vendor === 'nokia' ? XML_SAMPLE_NOKIA_2 : XML_SAMPLE_2;
     ToastManager.info('Sample Loaded', 'Modified XML loaded into XML 2.');
 });
 
@@ -6513,8 +6615,12 @@ document.getElementById('xmlCompareDownloadCsvBtn').addEventListener('click', ()
     if (xmlCompareFilter === 'added')    rows = rows.filter(r => r.status === 'added');
     if (xmlCompareFilter === 'removed')  rows = rows.filter(r => r.status === 'removed');
     if (xmlCompareFilter === 'modified') rows = rows.filter(r => r.status === 'modified');
-    const headers = ['Path', 'Element', 'Attribute', 'Value (XML 1)', 'Value (XML 2)', 'Status'];
-    const tableRows = rows.map(r => [r.path, r.element, r.attr, r.value1, r.value2, XML_STATUS_LABEL[r.status]]);
+    const headers = xmlCompareVendor === 'nokia'
+        ? ['distName', 'class', 'listName', 'listIndex', 'paramName', 'Value (XML 1)', 'Value (XML 2)', 'Status']
+        : ['Path', 'Element', 'Attribute', 'Value (XML 1)', 'Value (XML 2)', 'Status'];
+    const tableRows = xmlCompareVendor === 'nokia'
+        ? rows.map(r => [r.distName, r.cls, r.listName, String(r.listIndex), r.paramName, r.value1, r.value2, XML_STATUS_LABEL[r.status]])
+        : rows.map(r => [r.path, r.element, r.attr, r.value1, r.value2, XML_STATUS_LABEL[r.status]]);
     const csv = buildCsv(headers, tableRows);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -6530,8 +6636,13 @@ document.getElementById('xmlCompareCopyBtn').addEventListener('click', () => {
     if (xmlCompareFilter === 'added')    rows = rows.filter(r => r.status === 'added');
     if (xmlCompareFilter === 'removed')  rows = rows.filter(r => r.status === 'removed');
     if (xmlCompareFilter === 'modified') rows = rows.filter(r => r.status === 'modified');
-    const headers = ['Path', 'Element', 'Attribute', 'Value (XML 1)', 'Value (XML 2)', 'Status'];
-    const tsv = [headers.join('\t'), ...rows.map(r => [r.path, r.element, r.attr, r.value1, r.value2, XML_STATUS_LABEL[r.status]].join('\t'))].join('\n');
+    const headers = xmlCompareVendor === 'nokia'
+        ? ['distName', 'class', 'listName', 'listIndex', 'paramName', 'Value (XML 1)', 'Value (XML 2)', 'Status']
+        : ['Path', 'Element', 'Attribute', 'Value (XML 1)', 'Value (XML 2)', 'Status'];
+    const dataRows = xmlCompareVendor === 'nokia'
+        ? rows.map(r => [r.distName, r.cls, r.listName, String(r.listIndex), r.paramName, r.value1, r.value2, XML_STATUS_LABEL[r.status]])
+        : rows.map(r => [r.path, r.element, r.attr, r.value1, r.value2, XML_STATUS_LABEL[r.status]]);
+    const tsv = [headers.join('\t'), ...dataRows.map(r => r.join('\t'))].join('\n');
     navigator.clipboard.writeText(tsv).then(() => ToastManager.success('Copied', 'Comparison table copied to clipboard.'));
 });
 
