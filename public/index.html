@@ -211,6 +211,16 @@
                         </span>
                         <span class="usage-badge" data-tool="json"></span>
                     </button>
+                    <button class="tool-tab" data-tool="xmlmodifier">
+                        <span class="tab-main">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            XML Modifier
+                        </span>
+                        <span class="usage-badge" data-tool="xmlmodifier"></span>
+                    </button>
                 </div>
 
                 <!-- TL1 Parser Tool -->
@@ -1922,6 +1932,158 @@ Example:
                     </div>
                 </div>
 
+                <!-- XML Modifier Tool -->
+                <div class="tool-panel" id="xmlmodifierPanel">
+                    <div class="tool-header">
+                        <h2>XML Modifier</h2>
+                        <p>Add, modify, or delete XML elements and attributes using an Excel/CSV operations file. Load the template to get started.</p>
+                    </div>
+
+                    <div class="d-grid-compare">
+                        <!-- Left: XML input -->
+                        <div class="input-section">
+                            <div class="output-header">
+                                <label>XML File</label>
+                                <label class="btn btn-outline btn-sm upload-btn">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    Upload XML
+                                    <input type="file" id="xmlModXmlUpload" accept=".xml,.txt" hidden>
+                                </label>
+                            </div>
+                            <textarea id="xmlModXmlInput" class="textarea-compare" placeholder="Paste XML here or upload a file…
+
+Example:
+&lt;ManagedObjects&gt;
+  &lt;ManagedElement id=&quot;NE-1&quot; type=&quot;OTN&quot;&gt;
+    &lt;Slot name=&quot;SLOT-1&quot; adminState=&quot;IS&quot;&gt;
+      &lt;Port id=&quot;P1&quot; speed=&quot;100G&quot;/&gt;
+    &lt;/Slot&gt;
+  &lt;/ManagedElement&gt;
+&lt;/ManagedObjects&gt;"></textarea>
+                        </div>
+
+                        <!-- Right: Operations -->
+                        <div class="input-section">
+                            <div class="output-header">
+                                <label>Operations (Excel / CSV)</label>
+                                <div class="flex-gap-8">
+                                    <label class="btn btn-outline btn-sm upload-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <polyline points="17 8 12 3 7 8"/>
+                                            <line x1="12" y1="3" x2="12" y2="15"/>
+                                        </svg>
+                                        Upload
+                                        <input type="file" id="xmlModOpsUpload" accept=".xlsx,.xls,.csv" hidden>
+                                    </label>
+                                    <button class="btn btn-outline btn-sm" id="xmlModTemplateBtn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="8 17 12 21 16 17"/>
+                                            <line x1="12" y1="21" x2="12" y2="9"/>
+                                            <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                                        </svg>
+                                        Template
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Ops table preview -->
+                            <div id="xmlModOpsPreview" style="min-height:100px;max-height:180px;overflow-y:auto;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:8px;font-size:12px;">
+                                <span style="color:var(--text-secondary);">Upload an Excel/CSV or add rows manually below.</span>
+                            </div>
+
+                            <!-- Manual add row -->
+                            <div style="margin-top:10px;">
+                                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;font-weight:500;">Add Operation Manually</div>
+                                <div class="form-row" style="grid-template-columns:110px 1fr 100px 110px 1fr;gap:6px;margin-bottom:6px;">
+                                    <div class="form-group" style="margin-bottom:0">
+                                        <label>Operation</label>
+                                        <select id="xmlModRowOp">
+                                            <option value="add">add</option>
+                                            <option value="modify">modify</option>
+                                            <option value="delete">delete</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0">
+                                        <label>XPath</label>
+                                        <input type="text" id="xmlModRowXpath" placeholder="//Element[@id='x']">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0">
+                                        <label>Tag <span style="font-weight:normal;">(add)</span></label>
+                                        <input type="text" id="xmlModRowTag" placeholder="ChildTag">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0">
+                                        <label>Attribute</label>
+                                        <input type="text" id="xmlModRowAttr" placeholder="attrName">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0">
+                                        <label>Value</label>
+                                        <input type="text" id="xmlModRowVal" placeholder="value">
+                                    </div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <button class="btn btn-outline btn-sm" id="xmlModAddRowBtn">+ Add Row</button>
+                                    <button class="btn btn-outline btn-sm" id="xmlModClearOpsBtn">Clear Ops</button>
+                                    <span id="xmlModOpsCount" style="color:var(--text-secondary);font-size:12px;"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Operation guide -->
+                    <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px;font-size:12px;color:var(--text-secondary);">
+                        <strong style="color:var(--text-primary);">Excel/CSV columns:</strong>
+                        <code style="color:#f59e0b;margin-left:8px;">operation</code> · <code style="color:#f59e0b;">xpath</code> · <code style="color:#f59e0b;">tag</code> · <code style="color:#f59e0b;">attribute</code> · <code style="color:#f59e0b;">value</code>
+                        &nbsp;|&nbsp;
+                        <strong style="color:#22c55e;">add</strong> tag → add child element &nbsp;·&nbsp;
+                        <strong style="color:#22c55e;">add</strong> attribute → set attribute &nbsp;·&nbsp;
+                        <strong style="color:#3b82f6;">modify</strong> attribute → change attribute &nbsp;·&nbsp;
+                        <strong style="color:#3b82f6;">modify</strong> (no attr) → change text content &nbsp;·&nbsp;
+                        <strong style="color:#ef4444;">delete</strong> → remove element or attribute
+                    </div>
+
+                    <!-- Apply buttons -->
+                    <div class="input-actions">
+                        <button class="btn btn-secondary" id="xmlModApplyBtn">Apply Operations</button>
+                        <button class="btn btn-outline" id="xmlModSampleBtn">Load Sample</button>
+                        <button class="btn btn-outline" id="xmlModClearBtn">Clear All</button>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="xmlModOutputSection" style="display:none;">
+                        <!-- Operation log -->
+                        <div class="output-section" style="margin-bottom:16px;">
+                            <div class="output-header">
+                                <label id="xmlModLogLabel">Operation Results</label>
+                            </div>
+                            <div id="xmlModLogWrapper" style="max-height:220px;overflow-y:auto;"></div>
+                        </div>
+
+                        <!-- Modified XML output -->
+                        <div class="output-section">
+                            <div class="output-header">
+                                <label>Modified XML</label>
+                                <div class="flex-gap-8">
+                                    <button class="btn btn-primary" id="xmlModDownloadBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="8 17 12 21 16 17"/>
+                                            <line x1="12" y1="21" x2="12" y2="9"/>
+                                            <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                                        </svg>
+                                        Download XML
+                                    </button>
+                                    <button class="btn btn-outline" id="xmlModCopyBtn">Copy</button>
+                                </div>
+                            </div>
+                            <textarea id="xmlModOutput" class="textarea-tall" readonly placeholder="Modified XML will appear here after applying operations…"></textarea>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
 
@@ -1956,6 +2118,9 @@ Example:
     <!-- JSZip and FileSaver for ZIP export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- SheetJS for Excel read/write (XML Modifier tool) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>

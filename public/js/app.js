@@ -6141,9 +6141,14 @@ const XML_SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
  */
 function flattenXmlNode(node, parentPath, rows) {
     if (node.nodeType !== Node.ELEMENT_NODE) return;
-
     const path = parentPath ? `${parentPath}/${node.tagName}` : node.tagName;
-    const tag  = node.tagName;
+    flattenXmlNodeAt(node, path, rows);
+}
+
+// Internal: flatten node whose path is already fully resolved (supports sibling indexing)
+function flattenXmlNodeAt(node, path, rows) {
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const tag = node.tagName;
 
     // One row per attribute
     for (const attr of node.attributes) {
@@ -6165,8 +6170,24 @@ function flattenXmlNode(node, parentPath, rows) {
         rows.push([path, tag, '', '']);
     }
 
+    // Count how many times each child tag name appears (detect repeated siblings)
+    const tagCount = {};
     for (const child of node.children) {
-        flattenXmlNode(child, path, rows);
+        tagCount[child.tagName] = (tagCount[child.tagName] || 0) + 1;
+    }
+    // Recurse into children — index repeated siblings as [0], [1], [2]…
+    const tagIndex = {};
+    for (const child of node.children) {
+        const t = child.tagName;
+        let childPath;
+        if (tagCount[t] > 1) {
+            const idx = tagIndex[t] || 0;
+            tagIndex[t] = idx + 1;
+            childPath = `${path}/${t}[${idx}]`;
+        } else {
+            childPath = `${path}/${t}`;
+        }
+        flattenXmlNodeAt(child, childPath, rows);
     }
 }
 
@@ -7128,5 +7149,389 @@ document.getElementById('jsonCompareCopyBtn').addEventListener('click', () => {
     const tsv = [headers.join('\t'), ...rows.map(r => [r.path, r.type, r.value1, r.value2, STATUS_LABEL[r.status]].join('\t'))].join('\n');
     navigator.clipboard.writeText(tsv).then(() => {
         ToastManager.success('Copied', 'Comparison table copied to clipboard.');
+    });
+});
+
+// ==========================================
+// XML MODIFIER
+// ==========================================
+
+let xmlModOps = [];
+
+// --- Parse Excel/CSV file into operations array ---
+async function xmlModParseFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'csv' || ext === 'txt') {
+        const text = await file.text();
+        return xmlModParseCSV(text);
+    }
+    // Excel via SheetJS
+    if (typeof XLSX === 'undefined') throw new Error('SheetJS library not loaded. Refresh the page and try again.');
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+    return xmlModParseRows(rows);
+}
+
+function xmlModParseCSV(text) {
+    const rows = text.split(/\r?\n/).map(line => {
+        const cells = [];
+        let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') { inQ = !inQ; }
+            else if (line[i] === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+            else { cur += line[i]; }
+        }
+        cells.push(cur.trim());
+        return cells;
+    }).filter(r => r.some(c => String(c).trim()));
+    return xmlModParseRows(rows);
+}
+
+function xmlModParseRows(rows) {
+    if (rows.length < 2) throw new Error('File must have a header row and at least one data row.');
+    const header = rows[0].map(h => String(h).toLowerCase().trim());
+    const ci = name => header.findIndex(h => h === name);
+    const colOp    = header.findIndex(h => h === 'operation' || h === 'op');
+    const colXpath = header.findIndex(h => h === 'xpath' || h === 'path');
+    const colTag   = ci('tag');
+    const colAttr  = header.findIndex(h => h === 'attribute' || h === 'attr');
+    const colVal   = header.findIndex(h => h === 'value' || h === 'val');
+    if (colOp < 0)    throw new Error('Missing "operation" column. Required columns: operation, xpath, tag, attribute, value');
+    if (colXpath < 0) throw new Error('Missing "xpath" column. Required columns: operation, xpath, tag, attribute, value');
+    return rows.slice(1)
+        .filter(row => row.some(c => String(c).trim()))
+        .map(row => ({
+            operation: String(row[colOp]    || '').trim().toLowerCase(),
+            xpath:     String(row[colXpath] || '').trim(),
+            tag:       colTag  >= 0 ? String(row[colTag]  || '').trim() : '',
+            attribute: colAttr >= 0 ? String(row[colAttr] || '').trim() : '',
+            value:     colVal  >= 0 ? String(row[colVal]  || '').trim() : '',
+        }))
+        .filter(op => op.operation && op.xpath);
+}
+
+// --- Download Excel template ---
+function xmlModDownloadTemplate() {
+    if (typeof XLSX === 'undefined') { ToastManager.error('Not Ready', 'SheetJS library not loaded.'); return; }
+    const wb = XLSX.utils.book_new();
+    const data = [
+        ['operation', 'xpath', 'tag', 'attribute', 'value'],
+        ['modify', '//*[@name="SLOT-1"]', '', 'adminState', 'OOS'],
+        ['modify', '//*[@id="P1"]', '', '#text', 'P1-updated'],
+        ['add',    '//*[@id="NE-1"]/Slot[@name="SLOT-1"]', 'Port', '', 'P3-new'],
+        ['add',    '//*[@id="NE-1"]', '', 'version', '2.0'],
+        ['delete', '//*[@name="SLOT-2"]', '', '', ''],
+        ['delete', '//*[@id="NE-1"]', '', 'type', ''],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{ wch: 10 }, { wch: 42 }, { wch: 14 }, { wch: 14 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'XML Operations');
+    XLSX.writeFile(wb, 'xml_modifier_template.xlsx');
+}
+
+// --- Render operations preview table ---
+function xmlModRenderOpsTable() {
+    const ops = xmlModOps;
+    const preview = document.getElementById('xmlModOpsPreview');
+    const count   = document.getElementById('xmlModOpsCount');
+    if (ops.length === 0) {
+        preview.innerHTML = '<span style="color:var(--text-secondary);">No operations loaded. Upload a file or add rows manually.</span>';
+        count.textContent = '';
+        return;
+    }
+    const opColor = { add: '#22c55e', modify: '#3b82f6', delete: '#ef4444' };
+    let html = '<table class="mapping-table" style="font-size:11px;width:100%;">';
+    html += '<thead><tr><th>#</th><th>Op</th><th>XPath</th><th>Tag</th><th>Attr</th><th>Value</th><th></th></tr></thead><tbody>';
+    ops.forEach((op, i) => {
+        const c = opColor[op.operation] || '#888';
+        html += `<tr>
+            <td>${i + 1}</td>
+            <td><span style="color:${c};font-weight:600;">${escapeHtml(op.operation)}</span></td>
+            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(op.xpath)}">${escapeHtml(op.xpath)}</td>
+            <td>${escapeHtml(op.tag)}</td>
+            <td>${escapeHtml(op.attribute)}</td>
+            <td>${escapeHtml(op.value)}</td>
+            <td><button class="btn btn-outline btn-sm" onclick="xmlModRemoveRow(${i})" style="padding:1px 6px;min-width:0;font-size:11px;">✕</button></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    preview.innerHTML = html;
+    count.textContent = `${ops.length} operation${ops.length !== 1 ? 's' : ''}`;
+}
+
+function xmlModRemoveRow(index) {
+    xmlModOps.splice(index, 1);
+    xmlModRenderOpsTable();
+}
+
+// --- XPath evaluation helper ---
+function xmlModEvalXPath(doc, xpath) {
+    try {
+        const res = doc.evaluate(xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        const nodes = [];
+        for (let i = 0; i < res.snapshotLength; i++) nodes.push(res.snapshotItem(i));
+        return { nodes, error: null };
+    } catch (e) {
+        return { nodes: [], error: e.message };
+    }
+}
+
+// --- Apply a single operation to a parsed XML document ---
+function xmlModApplyOne(doc, op) {
+    const { operation, xpath, tag, attribute, value } = op;
+    const { nodes, error } = xmlModEvalXPath(doc, xpath);
+    if (error)          return { ok: false, msg: `XPath error: ${error}` };
+    if (!nodes.length)  return { ok: false, msg: 'No elements matched XPath' };
+
+    let count = 0;
+    try {
+        switch (operation) {
+            case 'add':
+                if (!tag && !attribute) return { ok: false, msg: 'Specify "tag" (new element) or "attribute" (new attribute)' };
+                nodes.forEach(parent => {
+                    if (tag) {
+                        const child = doc.createElement(tag);
+                        if (value) child.textContent = value;
+                        parent.appendChild(child);
+                    } else {
+                        parent.setAttribute(attribute, value);
+                    }
+                    count++;
+                });
+                return { ok: true, msg: `Applied to ${count} element(s)` };
+
+            case 'modify':
+                nodes.forEach(el => {
+                    if (attribute && attribute !== '#text') {
+                        el.setAttribute(attribute, value);
+                    } else {
+                        // Replace text content, keep child elements
+                        Array.from(el.childNodes)
+                            .filter(n => n.nodeType === 3)   // Node.TEXT_NODE = 3
+                            .forEach(n => el.removeChild(n));
+                        el.insertBefore(doc.createTextNode(value), el.firstChild);
+                    }
+                    count++;
+                });
+                return { ok: true, msg: `Modified ${count} element(s)` };
+
+            case 'delete':
+                nodes.forEach(el => {
+                    if (attribute && attribute !== '#text') {
+                        el.removeAttribute(attribute);
+                    } else {
+                        el.parentNode && el.parentNode.removeChild(el);
+                    }
+                    count++;
+                });
+                return { ok: true, msg: `Deleted ${count} item(s)` };
+
+            default:
+                return { ok: false, msg: `Unknown operation "${operation}". Use: add, modify, delete` };
+        }
+    } catch (e) {
+        return { ok: false, msg: e.message };
+    }
+}
+
+// --- Pretty-print serialized XML ---
+function xmlModPrettyPrint(xmlStr) {
+    try {
+        let out = '', indent = 0;
+        const tab = '  ';
+        xmlStr.split(/>\s*</).forEach((node, i, arr) => {
+            if (i !== 0) node = '<' + node;
+            if (i !== arr.length - 1) node = node + '>';
+            // Closing tag — dedent before
+            if (/^<\//.test(node)) indent = Math.max(0, indent - 1);
+            out += tab.repeat(indent) + node.trim() + '\n';
+            // Opening tag (not self-closing, not declaration) — indent after
+            if (/^<[^!?/][^>]*[^/]>$/.test(node) || /^<[^!?/][^>]*>$/.test(node) && !/<\//.test(node)) {
+                if (!/<\//.test(node)) indent++;
+            }
+        });
+        return out.trim();
+    } catch (e) {
+        return xmlStr;
+    }
+}
+
+// --- Main apply function ---
+function xmlModApply() {
+    const xmlText = document.getElementById('xmlModXmlInput').value.trim();
+    if (!xmlText) { ToastManager.error('No XML', 'Paste or upload an XML file first.'); return; }
+    if (!xmlModOps.length) { ToastManager.error('No Operations', 'Load an Excel/CSV or add operations manually.'); return; }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'application/xml');
+    if (doc.querySelector('parsererror')) {
+        ToastManager.error('Invalid XML', doc.querySelector('parsererror').textContent.split('\n')[0]);
+        return;
+    }
+
+    let successCount = 0, failCount = 0;
+    const results = xmlModOps.map((op, i) => {
+        const res = xmlModApplyOne(doc, op);
+        if (res.ok) successCount++; else failCount++;
+        return { op, res, i };
+    });
+
+    // Serialize & pretty-print
+    const serializer = new XMLSerializer();
+    const modifiedXml = xmlModPrettyPrint(serializer.serializeToString(doc));
+
+    // Render operation log
+    const opColor = { add: '#22c55e', modify: '#3b82f6', delete: '#ef4444' };
+    let logHtml = '<table class="mapping-table" style="font-size:12px;">';
+    logHtml += '<thead><tr><th>#</th><th>Operation</th><th>XPath</th><th>Tag</th><th>Attr</th><th>Value</th><th>Status</th><th>Detail</th></tr></thead><tbody>';
+    results.forEach(({ op, res, i }) => {
+        const c = opColor[op.operation] || '#888';
+        const statusStyle = res.ok ? 'color:#22c55e' : 'color:#ef4444';
+        const statusIcon  = res.ok ? '✅ OK' : '❌ FAIL';
+        logHtml += `<tr>
+            <td>${i + 1}</td>
+            <td><span style="color:${c};font-weight:600;">${escapeHtml(op.operation)}</span></td>
+            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(op.xpath)}">${escapeHtml(op.xpath)}</td>
+            <td>${escapeHtml(op.tag)}</td>
+            <td>${escapeHtml(op.attribute)}</td>
+            <td>${escapeHtml(op.value)}</td>
+            <td style="${statusStyle};white-space:nowrap;">${statusIcon}</td>
+            <td>${escapeHtml(res.msg)}</td>
+        </tr>`;
+    });
+    logHtml += '</tbody></table>';
+
+    document.getElementById('xmlModLogWrapper').innerHTML = logHtml;
+    document.getElementById('xmlModLogLabel').textContent =
+        `Operation Results — ${successCount} succeeded, ${failCount} failed`;
+    document.getElementById('xmlModOutput').value = modifiedXml;
+    document.getElementById('xmlModOutputSection').style.display = '';
+
+    if (failCount === 0) {
+        ToastManager.success('Done', `All ${successCount} operation(s) applied successfully.`);
+    } else if (successCount > 0) {
+        ToastManager.warning('Partial', `${successCount} succeeded, ${failCount} failed. See the log.`);
+    } else {
+        ToastManager.error('All Failed', `${failCount} operation(s) failed. Check XPath expressions.`);
+    }
+    UsageTracker.increment('xmlmodifier');
+}
+
+// --- Sample data ---
+const XML_MOD_SAMPLE_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<ManagedObjects>
+  <ManagedElement id="NE-1" type="OTN">
+    <Slot name="SLOT-1" adminState="IS">
+      <Port id="P1" speed="100G"/>
+      <Port id="P2" speed="10G"/>
+    </Slot>
+    <Slot name="SLOT-2" adminState="IS">
+      <Port id="P1" speed="100G"/>
+    </Slot>
+  </ManagedElement>
+  <ManagedElement id="NE-2" type="PTN">
+    <Slot name="SLOT-1" adminState="IS">
+      <Port id="P1" speed="1G"/>
+    </Slot>
+  </ManagedElement>
+</ManagedObjects>`;
+
+const XML_MOD_SAMPLE_OPS = [
+    { operation: 'modify',  xpath: '//*[@name="SLOT-2"]',                      tag: '',   attribute: 'adminState', value: 'OOS'       },
+    { operation: 'add',     xpath: '//*[@name="SLOT-1" and @adminState="IS"]',  tag: 'Port', attribute: '',        value: 'P3-new'    },
+    { operation: 'delete',  xpath: '//*[@id="NE-2"]/Slot',                      tag: '',   attribute: '',          value: ''          },
+    { operation: 'modify',  xpath: '//*[@id="NE-1"]',                           tag: '',   attribute: 'version',   value: '2.0'       },
+];
+
+// --- Event listeners ---
+
+document.getElementById('xmlModXmlUpload').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+        document.getElementById('xmlModXmlInput').value = evt.target.result;
+        ToastManager.info('XML Loaded', `${file.name} loaded. Add operations and click Apply.`);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+});
+
+document.getElementById('xmlModOpsUpload').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+        const ops = await xmlModParseFile(file);
+        xmlModOps = ops;
+        xmlModRenderOpsTable();
+        ToastManager.success('Loaded', `${ops.length} operation(s) loaded from ${file.name}.`);
+    } catch (err) {
+        ToastManager.error('Parse Error', err.message);
+    }
+    e.target.value = '';
+});
+
+document.getElementById('xmlModTemplateBtn').addEventListener('click', () => {
+    xmlModDownloadTemplate();
+    ToastManager.success('Downloaded', 'Template saved as xml_modifier_template.xlsx');
+});
+
+document.getElementById('xmlModAddRowBtn').addEventListener('click', () => {
+    const xpath = document.getElementById('xmlModRowXpath').value.trim();
+    if (!xpath) { ToastManager.warning('Missing XPath', 'Enter an XPath expression.'); return; }
+    xmlModOps.push({
+        operation: document.getElementById('xmlModRowOp').value,
+        xpath,
+        tag:       document.getElementById('xmlModRowTag').value.trim(),
+        attribute: document.getElementById('xmlModRowAttr').value.trim(),
+        value:     document.getElementById('xmlModRowVal').value.trim(),
+    });
+    xmlModRenderOpsTable();
+    document.getElementById('xmlModRowXpath').value = '';
+    document.getElementById('xmlModRowTag').value   = '';
+    document.getElementById('xmlModRowAttr').value  = '';
+    document.getElementById('xmlModRowVal').value   = '';
+});
+
+document.getElementById('xmlModClearOpsBtn').addEventListener('click', () => {
+    xmlModOps = [];
+    xmlModRenderOpsTable();
+});
+
+document.getElementById('xmlModApplyBtn').addEventListener('click', function () {
+    withLoader(this, () => xmlModApply());
+});
+
+document.getElementById('xmlModSampleBtn').addEventListener('click', () => {
+    document.getElementById('xmlModXmlInput').value = XML_MOD_SAMPLE_XML;
+    xmlModOps = XML_MOD_SAMPLE_OPS.map(o => ({ ...o }));
+    xmlModRenderOpsTable();
+    ToastManager.info('Sample Loaded', 'Click "Apply Operations" to see the result.');
+});
+
+document.getElementById('xmlModClearBtn').addEventListener('click', () => {
+    document.getElementById('xmlModXmlInput').value = '';
+    document.getElementById('xmlModOutput').value   = '';
+    document.getElementById('xmlModOutputSection').style.display = 'none';
+    xmlModOps = [];
+    xmlModRenderOpsTable();
+});
+
+document.getElementById('xmlModDownloadBtn').addEventListener('click', () => {
+    const xml = document.getElementById('xmlModOutput').value;
+    if (!xml) { ToastManager.warning('No Output', 'Apply operations first.'); return; }
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'modified.xml'; a.click();
+    URL.revokeObjectURL(url);
+    ToastManager.success('Downloaded', 'modified.xml saved.');
+});
+
+document.getElementById('xmlModCopyBtn').addEventListener('click', () => {
+    const xml = document.getElementById('xmlModOutput').value;
+    if (!xml) { ToastManager.warning('No Output', 'Apply operations first.'); return; }
+    navigator.clipboard.writeText(xml).then(() => {
+        ToastManager.success('Copied', 'Modified XML copied to clipboard.');
     });
 });

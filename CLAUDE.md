@@ -108,7 +108,23 @@ A 4-phase wizard for designing complete integration solutions:
 - Database schemas
 - Deployment configurations
 
-### 9. Config Compare
+### 9. XML Modifier
+- Upload XML file (paste or upload)
+- Upload Excel (.xlsx) or CSV file with operations — or add rows manually via form
+- **Operations format** — columns: `operation` | `xpath` | `tag` | `attribute` | `value`
+  - `add` + tag → add child element `<tag>value</tag>` under XPath match
+  - `add` + attribute → set attribute on XPath match
+  - `modify` + attribute → change attribute value
+  - `modify` (no attribute, or `#text`) → change element text content
+  - `delete` (no attribute) → remove element at XPath
+  - `delete` + attribute → remove attribute from element at XPath
+- Download Excel template with example rows
+- Operation log shows per-row ✅/❌ status with details
+- Download or copy modified XML
+- Uses SheetJS (`xlsx` from cdnjs) for Excel parsing/generation
+- `data-tool="xmlmodifier"`, panel id=`xmlmodifierPanel`
+
+### 10. Config Compare
 - Compare two configuration files side-by-side
 - Highlight differences
 - Support for various config formats
